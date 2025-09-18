@@ -31,3 +31,24 @@ ranklist_db
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
+
+# IDEA project files
+*.iml
+
+# Editor swap/backup files
+*.swp
+*.swo
+*.tmp
+*.bak
+*.orig
+
+# OS generated files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Java crash logs
+replay_pid*
+
+# Local environment config
+.env
