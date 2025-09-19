@@ -1,6 +1,6 @@
 package edu.hitsz.aircraft;
 
-//import edu.hitsz.prop.AbstractProp;
+import edu.hitsz.prop.AbstractProp;
 
 import java.util.List;
 
@@ -23,7 +23,8 @@ public abstract class AbstractEnemy extends AbstractAircraft {
 
     /**
      * 敌机可能掉落的道具
+     *
      * @return 道具列表，可能为空
      */
-//    public abstract List<AbstractProp> mayDrop();
+    public abstract List<AbstractProp> mayDrop();
 }

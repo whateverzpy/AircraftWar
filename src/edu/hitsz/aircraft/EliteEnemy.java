@@ -4,6 +4,8 @@ import edu.hitsz.application.ImageManager;
 import edu.hitsz.bullet.BaseBullet;
 import edu.hitsz.bullet.EnemyBullet;
 import edu.hitsz.application.Main;
+import edu.hitsz.prop.AbstractProp;
+import edu.hitsz.prop.BloodProp;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -70,4 +72,20 @@ public class EliteEnemy extends AbstractEnemy {
     public int getScore() {
         return 30; // 精英敌机得分为30
     }
+
+    @Override
+    public List<AbstractProp> mayDrop() {
+        List<AbstractProp> props = new LinkedList<>();
+
+        if (Math.random() < 0.5) {
+            // 这里需要根据项目中实际的道具类来创建
+            // 示例：假设有血包道具类 BloodProp
+            AbstractProp prop = new BloodProp(this.getLocationX(), this.getLocationY(), 0, 5);
+            props.add(prop);
+            System.out.println("EliteEnemy dropped a BloodProp");
+        }
+
+        return props;
+    }
+
 }
