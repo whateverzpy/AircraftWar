@@ -1,0 +1,148 @@
+@startuml
+' 基础抽象飞行物
+abstract class AbstractFlyingObject {
+    # locationX:int
+    # locationY:int
+    # speedX:int
+    # speedY:int
+    # image:BufferedImage
+    # width:int
+    # height:int
+    # isValid:boolean
+    + AbstractFlyingObject(int locationX, int locationY, int speedX, int speedY)
+    + forward():void
+    + crash(f:AbstractFlyingObject):boolean
+    + setLocation(x:double, y:double):void
+    + getLocationX():int
+    + getLocationY():int
+    + getSpeedY():int
+    + getImage():BufferedImage
+    + getWidth():int
+    + getHeight():int
+    + notValid():boolean
+    + vanish():void
+}
+
+' 飞机抽象（英雄与敌机共同父类）
+abstract class AbstractAircraft {
+    # maxHp:int
+    # hp:int
+    + AbstractAircraft(int locationX, int locationY, int speedX, int speedY, int hp)
+    + decreaseHp(decrease:int):void
+    + getHp():int
+    + shoot():List<BaseBullet>
+}
+
+' 敌机抽象，便于将来扩展精英、Boss 行为（如策略、掉落）
+abstract class AbstractEnemy {
+    + getScore():int
+    + mayDrop():List<AbstractProp>
+}
+
+AbstractAircraft <|-- AbstractEnemy
+
+' 英雄机
+class HeroAircraft {
+    - shootNum:int
+    - power:int
+    - direction:int
+    + HeroAircraft(int locationX, int locationY, int speedX, int speedY, int hp)
+    + forward():void
+    + shoot():List<BaseBullet>
+}
+
+' 普通敌机
+class MobEnemy {
+    + MobEnemy(int locationX, int locationY, int speedX, int speedY, int hp)
+    + forward():void
+    + shoot():List<BaseBullet>
+    + getScore():int
+    + mayDrop():List<AbstractProp>
+}
+
+' 精英敌机（射击更频繁/子弹更强，可掉落道具）
+class EliteEnemy {
+    - shootInterval:int
+    + EliteEnemy(int locationX, int locationY, int speedX, int speedY, int hp)
+    + forward():void
+    + shoot():List<BaseBullet>
+    + getScore():int
+    + mayDrop():List<AbstractProp>
+}
+
+' BossEnemy 预留（暂不实现）
+' class BossEnemy {
+' }
+
+AbstractAircraft <|-- HeroAircraft
+AbstractEnemy <|-- MobEnemy
+AbstractEnemy <|-- EliteEnemy
+' AbstractEnemy <|-- BossEnemy  (预留)
+
+' 子弹抽象
+abstract class BaseBullet {
+    - power:int
+    + BaseBullet(int locationX, int locationY, int speedX, int speedY, int power)
+    + forward():void
+    + getPower():int
+}
+
+class HeroBullet {
+    + HeroBullet(int locationX, int locationY, int speedX, int speedY, int power)
+}
+
+class EnemyBullet {
+    + EnemyBullet(int locationX, int locationY, int speedX, int speedY, int power)
+}
+
+BaseBullet <|-- HeroBullet
+BaseBullet <|-- EnemyBullet
+
+' 道具抽象
+abstract class AbstractProp {
+    + apply(target:HeroAircraft):void
+    + forward():void
+}
+
+AbstractFlyingObject <|-- AbstractProp
+
+' 火力道具：提升射击数/威力/持续时间
+class FireProp {
+    - duration:int
+    + FireProp(int locationX, int locationY, int speedX, int speedY)
+    + apply(target:HeroAircraft):void
+}
+
+' 炸弹道具：触发全局清除（可触发观察者）
+class BombProp {
+    + BombProp(int locationX, int locationY, int speedX, int speedY)
+    + apply(target:HeroAircraft):void
+    + bind(ob:EnemyObserver):void
+    + notifyAll():void
+}
+
+' 加血道具
+class HpProp {
+    - restore:int
+    + HpProp(int locationX, int locationY, int speedX, int speedY)
+    + apply(target:HeroAircraft):void
+}
+
+AbstractProp <|-- FireProp
+AbstractProp <|-- BombProp
+AbstractProp <|-- HpProp
+
+' 观察者接口（可选，用于炸弹道具影响敌机/子弹）
+interface EnemyObserver {
+    + updateOnBomb():void
+}
+
+EnemyObserver <|.. MobEnemy
+EnemyObserver <|.. EliteEnemy
+' EnemyObserver <|.. BossEnemy
+
+' 继承关系补充
+AbstractFlyingObject <|-- AbstractAircraft
+AbstractFlyingObject <|-- BaseBullet
+
+@enduml
