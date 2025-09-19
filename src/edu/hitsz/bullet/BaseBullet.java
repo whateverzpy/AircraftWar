@@ -13,6 +13,15 @@ public abstract class BaseBullet extends AbstractFlyingObject {
 
     private int power = 10;
 
+    /**
+     * 子弹构造方法
+     *
+     * @param locationX X 坐标
+     * @param locationY Y 坐标
+     * @param speedX    X 轴速度
+     * @param speedY    Y 轴速度
+     * @param power     子弹伤害
+     */
     public BaseBullet(int locationX, int locationY, int speedX, int speedY, int power) {
         super(locationX, locationY, speedX, speedY);
         this.power = power;
@@ -28,10 +37,10 @@ public abstract class BaseBullet extends AbstractFlyingObject {
         }
 
         // 判定 y 轴出界
-        if (speedY > 0 && locationY >= Main.WINDOW_HEIGHT ) {
+        if (speedY > 0 && locationY >= Main.WINDOW_HEIGHT) {
             // 向下飞行出界
             vanish();
-        }else if (locationY <= 0){
+        } else if (locationY <= 0) {
             // 向上飞行出界
             vanish();
         }

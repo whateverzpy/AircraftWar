@@ -10,6 +10,15 @@ import java.util.List;
  */
 public abstract class AbstractEnemy extends AbstractAircraft {
 
+    /**
+     * 敌机构造方法
+     *
+     * @param locationX X 坐标
+     * @param locationY Y 坐标
+     * @param speedX    X 轴速度
+     * @param speedY    Y 轴速度
+     * @param hp        生命值
+     */
     public AbstractEnemy(int locationX, int locationY, int speedX, int speedY, int hp) {
         super(locationX, locationY, speedX, speedY, hp);
     }

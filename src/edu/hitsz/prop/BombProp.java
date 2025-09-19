@@ -8,13 +8,8 @@ public class BombProp extends AbstractProp {
     }
 
     @Override
-    public void forward() {
-        super.forward();
-    }
-
-    @Override
-    public void action(HeroAircraft heroAircraft) {
+    public void effect(HeroAircraft heroAircraft) {
         // TODO: Implement bomb effect
-        System.out.println("BombProp activated!");
+        System.out.println("BombSupply active!");
     }
 }

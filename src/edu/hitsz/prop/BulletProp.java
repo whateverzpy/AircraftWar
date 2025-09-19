@@ -8,13 +8,8 @@ public class BulletProp extends AbstractProp {
     }
 
     @Override
-    public void forward() {
-        super.forward();
-    }
-
-    @Override
-    public void action(HeroAircraft heroAircraft) {
+    public void effect(HeroAircraft heroAircraft) {
         // TODO: Implement bullet effect
-        System.out.println("BulletProp activated!");
+        System.out.println("FireSupply active!");
     }
 }

@@ -1,6 +1,5 @@
 package edu.hitsz.aircraft;
 
-import edu.hitsz.application.ImageManager;
 import edu.hitsz.bullet.BaseBullet;
 import edu.hitsz.bullet.EnemyBullet;
 import edu.hitsz.application.Main;
@@ -26,29 +25,30 @@ public class EliteEnemy extends AbstractEnemy {
     /**
      * 子弹伤害
      */
-    private int power = 30;
+    private int power = 25;
 
+    /**
+     * 道具掉落概率
+     */
+    private double propDropRate = 0.5;
+
+    /**
+     * 精英敌机构造方法
+     *
+     * @param locationX X 坐标
+     * @param locationY Y 坐标
+     * @param speedX    X 轴速度
+     * @param speedY    Y 轴速度
+     * @param hp        生命值
+     */
     public EliteEnemy(int locationX, int locationY, int speedX, int speedY, int hp) {
         super(locationX, locationY, speedX, speedY, hp);
+        this.shootCycle = 800;
     }
 
     @Override
     public void forward() {
         super.forward();
-
-        // 检查左右边界，实现左右移动
-        int aircraftWidth = ImageManager.ELITE_ENEMY_IMAGE.getWidth(); // 假设敌机宽度为50像素，根据实际情况调整
-        if (locationX <= aircraftWidth / 2 || locationX >= Main.WINDOW_WIDTH - aircraftWidth / 2) {
-            // 到达边界时反转水平速度方向
-            speedX = -speedX;
-            // 确保敌机不会卡在边界外
-            if (locationX <= aircraftWidth / 2) {
-                locationX = aircraftWidth / 2;
-            } else {
-                locationX = Main.WINDOW_WIDTH - aircraftWidth / 2;
-            }
-            System.out.println("EliteEnemy changed direction, new speedX: " + speedX);
-        }
 
         // 检查是否飞出屏幕下方
         if (locationY >= Main.WINDOW_HEIGHT) {
@@ -72,14 +72,14 @@ public class EliteEnemy extends AbstractEnemy {
 
     @Override
     public int getScore() {
-        return 30; // 精英敌机得分为30
+        return 30;
     }
 
     @Override
     public List<AbstractProp> mayDrop() {
         List<AbstractProp> props = new LinkedList<>();
 
-        if (Math.random() < 0.5) {
+        if (Math.random() < propDropRate) {
             int propType = (int) (Math.random() * 3);
             AbstractProp prop;
             switch (propType) {

@@ -15,6 +15,15 @@ import java.util.List;
  */
 public class MobEnemy extends AbstractEnemy {
 
+    /**
+     * 普通敌机构造方法
+     *
+     * @param locationX X 坐标
+     * @param locationY Y 坐标
+     * @param speedX    X 轴速度
+     * @param speedY    Y 轴速度
+     * @param hp        生命值
+     */
     public MobEnemy(int locationX, int locationY, int speedX, int speedY, int hp) {
         super(locationX, locationY, speedX, speedY, hp);
     }
@@ -30,6 +39,7 @@ public class MobEnemy extends AbstractEnemy {
 
     @Override
     public List<BaseBullet> shoot() {
+        // 普通敌机不发射子弹
         return new LinkedList<>();
     }
 
@@ -40,6 +50,7 @@ public class MobEnemy extends AbstractEnemy {
 
     @Override
     public List<AbstractProp> mayDrop() {
+        // 普通敌机不掉落道具
         return new LinkedList<>();
     }
 }

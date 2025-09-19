@@ -11,10 +11,10 @@ abstract class AbstractFlyingObject {
     # isValid:boolean
     + AbstractFlyingObject(int locationX, int locationY, int speedX, int speedY)
     + forward():void
-    + crash(f:AbstractFlyingObject):boolean
-    + setLocation(x:double, y:double):void
+    + crash(AbstractFlyingObject flyingObject):boolean
     + getLocationX():int
     + getLocationY():int
+    + setLocation(double locationX, double locationY):void
     + getSpeedY():int
     + getImage():BufferedImage
     + getWidth():int
@@ -27,16 +27,25 @@ abstract class AbstractFlyingObject {
 abstract class AbstractAircraft {
     # maxHp:int
     # hp:int
+    # shootCycle:int
+    # shootTimer:int
     + AbstractAircraft(int locationX, int locationY, int speedX, int speedY, int hp)
-    + decreaseHp(decrease:int):void
+    + decreaseHp(int decrease):void
     + getHp():int
-    + shoot():List<BaseBullet>
+    + getMaxHp():int
+    + setHp(int hp):void
+    + updateShootTimer(int timeInterval):void
+    + setShootCycle(int shootCycle):void
+    + {abstract} shoot():List<BaseBullet>
 }
+
+AbstractFlyingObject <|-- AbstractAircraft
 
 ' 敌机抽象，便于将来扩展精英、Boss 行为（如策略、掉落）
 abstract class AbstractEnemy {
-    + getScore():int
-    + mayDrop():List<AbstractProp>
+    + AbstractEnemy(int locationX, int locationY, int speedX, int speedY, int hp)
+    + {abstract} getScore():int
+    + {abstract} mayDrop():List<AbstractProp>
 }
 
 AbstractAircraft <|-- AbstractEnemy
@@ -47,9 +56,13 @@ class HeroAircraft {
     - power:int
     - direction:int
     + HeroAircraft(int locationX, int locationY, int speedX, int speedY, int hp)
+    + getShootNum():int
+    + setShootNum(int shootNum):void
     + forward():void
     + shoot():List<BaseBullet>
 }
+
+AbstractAircraft <|-- HeroAircraft
 
 ' 普通敌机
 class MobEnemy {
@@ -62,7 +75,9 @@ class MobEnemy {
 
 ' 精英敌机（射击更频繁/子弹更强，可掉落道具）
 class EliteEnemy {
-    - shootInterval:int
+    - direction:int
+    - power:int
+    - propDropRate:double
     + EliteEnemy(int locationX, int locationY, int speedX, int speedY, int hp)
     + forward():void
     + shoot():List<BaseBullet>
@@ -74,7 +89,6 @@ class EliteEnemy {
 ' class BossEnemy {
 ' }
 
-AbstractAircraft <|-- HeroAircraft
 AbstractEnemy <|-- MobEnemy
 AbstractEnemy <|-- EliteEnemy
 ' AbstractEnemy <|-- BossEnemy  (预留)
@@ -86,6 +100,8 @@ abstract class BaseBullet {
     + forward():void
     + getPower():int
 }
+
+AbstractFlyingObject <|-- BaseBullet
 
 class HeroBullet {
     + HeroBullet(int locationX, int locationY, int speedX, int speedY, int power)
@@ -100,49 +116,34 @@ BaseBullet <|-- EnemyBullet
 
 ' 道具抽象
 abstract class AbstractProp {
-    + apply(target:HeroAircraft):void
+    + AbstractProp(int locationX, int locationY, int speedX, int speedY)
     + forward():void
+    + {abstract} effect(HeroAircraft heroAircraft):void
 }
 
 AbstractFlyingObject <|-- AbstractProp
 
 ' 火力道具：提升射击数/威力/持续时间
-class FireProp {
-    - duration:int
-    + FireProp(int locationX, int locationY, int speedX, int speedY)
-    + apply(target:HeroAircraft):void
+class BloodProp {
+    - {static} BLOOD_INCREASE:int
+    + BloodProp(int locationX, int locationY, int speedX, int speedY)
+    + effect(HeroAircraft heroAircraft):void
 }
 
 ' 炸弹道具：触发全局清除（可触发观察者）
 class BombProp {
     + BombProp(int locationX, int locationY, int speedX, int speedY)
-    + apply(target:HeroAircraft):void
-    + bind(ob:EnemyObserver):void
-    + notifyAll():void
+    + effect(HeroAircraft heroAircraft):void
 }
 
 ' 加血道具
-class HpProp {
-    - restore:int
-    + HpProp(int locationX, int locationY, int speedX, int speedY)
-    + apply(target:HeroAircraft):void
+class BulletProp {
+    + BulletProp(int locationX, int locationY, int speedX, int speedY)
+    + effect(HeroAircraft heroAircraft):void
 }
 
-AbstractProp <|-- FireProp
+AbstractProp <|-- BloodProp
 AbstractProp <|-- BombProp
-AbstractProp <|-- HpProp
-
-' 观察者接口（可选，用于炸弹道具影响敌机/子弹）
-interface EnemyObserver {
-    + updateOnBomb():void
-}
-
-EnemyObserver <|.. MobEnemy
-EnemyObserver <|.. EliteEnemy
-' EnemyObserver <|.. BossEnemy
-
-' 继承关系补充
-AbstractFlyingObject <|-- AbstractAircraft
-AbstractFlyingObject <|-- BaseBullet
+AbstractProp <|-- BulletProp
 
 @enduml

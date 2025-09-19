@@ -80,10 +80,10 @@ public class Game extends JPanel {
 
         props = new LinkedList<>();
 
-        /**
-         * Scheduled 线程池，用于定时任务调度
-         * 关于alibaba code guide：可命名的 ThreadFactory 一般需要第三方包
-         * apache 第三方库： org.apache.commons.lang3.concurrent.BasicThreadFactory
+        /*
+          Scheduled 线程池，用于定时任务调度
+          关于alibaba code guide：可命名的 ThreadFactory 一般需要第三方包
+          apache 第三方库： org.apache.commons.lang3.concurrent.BasicThreadFactory
          */
         this.executorService = new ScheduledThreadPoolExecutor(1,
                 new BasicThreadFactory.Builder().namingPattern("game-action-%d").daemon(true).build());
@@ -103,7 +103,6 @@ public class Game extends JPanel {
 
             time += timeInterval;
 
-
             // 周期性执行（控制频率）
             if (timeCountAndNewCycleJudge()) {
                 System.out.println(time);
@@ -111,7 +110,7 @@ public class Game extends JPanel {
 
                 if (enemyAircrafts.size() < enemyMaxNumber) {
                     double rand = Math.random();
-                    if (rand > eliteProbability) { // 70%概率生成普通敌机
+                    if (rand > eliteProbability) {
                         enemyAircrafts.add(new MobEnemy(
                                 (int) (Math.random() * (Main.WINDOW_WIDTH - ImageManager.MOB_ENEMY_IMAGE.getWidth())),
                                 (int) (Math.random() * Main.WINDOW_HEIGHT * 0.05),
@@ -119,7 +118,7 @@ public class Game extends JPanel {
                                 10,
                                 30
                         ));
-                    } else { // 30%概率生成精英敌机
+                    } else {
                         enemyAircrafts.add(new EliteEnemy(
                                 (int) (Math.random() * (Main.WINDOW_WIDTH - ImageManager.ELITE_ENEMY_IMAGE.getWidth())),
                                 (int) (Math.random() * Main.WINDOW_HEIGHT * 0.05),
@@ -129,10 +128,10 @@ public class Game extends JPanel {
                         ));
                     }
                 }
-
-                // 飞机射出子弹
-                shootAction();
             }
+
+            // 飞机射出子弹
+            shootAction();
 
             // 子弹移动
             bulletsMoveAction();
@@ -162,9 +161,9 @@ public class Game extends JPanel {
 
         };
 
-        /**
-         * 以固定延迟时间进行执行
-         * 本次任务执行完成后，需要延迟设定的延迟时间，才会执行新的任务
+        /*
+          以固定延迟时间进行执行
+          本次任务执行完成后，需要延迟设定的延迟时间，才会执行新的任务
          */
         executorService.scheduleWithFixedDelay(task, timeInterval, timeInterval, TimeUnit.MILLISECONDS);
 
@@ -187,14 +186,19 @@ public class Game extends JPanel {
 
     private void shootAction() {
         // TODO 敌机射击
+        // 敌机射击 - 每个敌机独立计时
         for (AbstractAircraft enemyAircraft : enemyAircrafts) {
             if (enemyAircraft instanceof EliteEnemy) {
-                enemyBullets.addAll(enemyAircraft.shoot());
-//                System.out.println("elite shoot");
+                if (enemyAircraft.updateShootTimer(timeInterval)) {
+                    enemyBullets.addAll(enemyAircraft.shoot());
+                }
             }
         }
-        // 英雄射击
-        heroBullets.addAll(heroAircraft.shoot());
+
+        // 英雄射击 - 独立计时
+        if (heroAircraft.updateShootTimer(timeInterval)) {
+            heroBullets.addAll(heroAircraft.shoot());
+        }
     }
 
     private void bulletsMoveAction() {
@@ -277,7 +281,7 @@ public class Game extends JPanel {
                 continue;
             }
             if (heroAircraft.crash(prop)) {
-                prop.action(heroAircraft);
+                prop.effect(heroAircraft);
                 prop.vanish();
             }
         }
@@ -306,7 +310,7 @@ public class Game extends JPanel {
      * 重写paint方法
      * 通过重复调用paint方法，实现游戏动画
      *
-     * @param g
+     * @param g Graphics 类，可以理解为一支画笔
      */
     @Override
     public void paint(Graphics g) {
@@ -340,7 +344,7 @@ public class Game extends JPanel {
     }
 
     private void paintImageWithPositionRevised(Graphics g, List<? extends AbstractFlyingObject> objects) {
-        if (objects.size() == 0) {
+        if (objects.isEmpty()) {
             return;
         }
 

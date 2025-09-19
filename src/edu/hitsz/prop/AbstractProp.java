@@ -5,6 +5,14 @@ import edu.hitsz.basic.AbstractFlyingObject;
 
 public abstract class AbstractProp extends AbstractFlyingObject {
 
+    /**
+     * 道具构造方法
+     *
+     * @param locationX X 坐标
+     * @param locationY Y 坐标
+     * @param speedX    X 轴速度
+     * @param speedY    Y 轴速度
+     */
     public AbstractProp(int locationX, int locationY, int speedX, int speedY) {
         super(locationX, locationY, speedX, speedY);
     }
@@ -28,5 +36,5 @@ public abstract class AbstractProp extends AbstractFlyingObject {
      *
      * @param heroAircraft 英雄机对象
      */
-    public abstract void action(HeroAircraft heroAircraft);
+    public abstract void effect(HeroAircraft heroAircraft);
 }
