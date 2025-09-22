@@ -4,13 +4,10 @@ import edu.hitsz.bullet.BaseBullet;
 import edu.hitsz.bullet.EnemyBullet;
 import edu.hitsz.application.Main;
 import edu.hitsz.prop.AbstractProp;
-import edu.hitsz.prop.BloodProp;
-import edu.hitsz.prop.BulletProp;
-import edu.hitsz.prop.BombProp;
+import edu.hitsz.factory.prop.RandomPropDropper;
 
 import java.util.LinkedList;
 import java.util.List;
-
 
 /**
  * 精英敌机
@@ -31,6 +28,7 @@ public class EliteEnemy extends AbstractEnemy {
      * 道具掉落概率
      */
     private double propDropRate = 0.5;
+    private final RandomPropDropper propDropper = new RandomPropDropper(propDropRate);
 
     /**
      * 精英敌机构造方法
@@ -77,29 +75,7 @@ public class EliteEnemy extends AbstractEnemy {
 
     @Override
     public List<AbstractProp> mayDrop() {
-        List<AbstractProp> props = new LinkedList<>();
-
-        if (Math.random() < propDropRate) {
-            int propType = (int) (Math.random() * 3);
-            AbstractProp prop;
-            switch (propType) {
-                case 0:
-                    prop = new BloodProp(this.getLocationX(), this.getLocationY(), 0, 5);
-                    break;
-                case 1:
-                    prop = new BombProp(this.getLocationX(), this.getLocationY(), 0, 5);
-                    break;
-                case 2:
-                default:
-                    prop = new BulletProp(this.getLocationX(), this.getLocationY(), 0, 5);
-                    break;
-            }
-            props.add(prop);
-            System.out.println("EliteEnemy dropped a Prop: " + prop.getClass().getSimpleName());
-
-        }
-
-        return props;
+        return propDropper.generate(this.getLocationX(), this.getLocationY());
     }
 
 }

@@ -5,6 +5,8 @@ import edu.hitsz.bullet.BaseBullet;
 import edu.hitsz.basic.AbstractFlyingObject;
 
 import edu.hitsz.prop.AbstractProp;
+import edu.hitsz.factory.enemy.RandomEnemyFactory;
+import edu.hitsz.factory.enemy.EnemyFactory;
 
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 
@@ -63,6 +65,9 @@ public class Game extends JPanel {
     private int cycleTime = 0;
     private double eliteProbability = 0.3;
 
+    // 敌机工厂（封装普通与精英概率生成）
+    private final RandomEnemyFactory randomEnemyFactory;
+
     /**
      * 游戏结束标志
      */
@@ -80,15 +85,18 @@ public class Game extends JPanel {
 
         props = new LinkedList<>();
 
+        // 初始化随机敌机工厂
+        randomEnemyFactory = new RandomEnemyFactory(eliteProbability);
+
         /*
-          Scheduled 线程池，用于定时任务调度
-          关于alibaba code guide：可命名的 ThreadFactory 一般需要第三方包
-          apache 第三方库： org.apache.commons.lang3.concurrent.BasicThreadFactory
+         * Scheduled 线程池，用于定时任务调度
+         * 关于alibaba code guide：可命名的 ThreadFactory 一般需要第三方包
+         * apache 第三方库： org.apache.commons.lang3.concurrent.BasicThreadFactory
          */
         this.executorService = new ScheduledThreadPoolExecutor(1,
                 new BasicThreadFactory.Builder().namingPattern("game-action-%d").daemon(true).build());
 
-        //启动英雄机鼠标监听
+        // 启动英雄机鼠标监听
         new HeroController(this, heroAircraft);
 
     }
@@ -109,24 +117,8 @@ public class Game extends JPanel {
                 // 新敌机产生
 
                 if (enemyAircrafts.size() < enemyMaxNumber) {
-                    double rand = Math.random();
-                    if (rand > eliteProbability) {
-                        enemyAircrafts.add(new MobEnemy(
-                                (int) (Math.random() * (Main.WINDOW_WIDTH - ImageManager.MOB_ENEMY_IMAGE.getWidth())),
-                                (int) (Math.random() * Main.WINDOW_HEIGHT * 0.05),
-                                0,
-                                10,
-                                30
-                        ));
-                    } else {
-                        enemyAircrafts.add(new EliteEnemy(
-                                (int) (Math.random() * (Main.WINDOW_WIDTH - ImageManager.ELITE_ENEMY_IMAGE.getWidth())),
-                                (int) (Math.random() * Main.WINDOW_HEIGHT * 0.05),
-                                (int) (Math.random() * 20 - 10),
-                                10,
-                                60
-                        ));
-                    }
+                    randomEnemyFactory.setEliteProbability(eliteProbability);
+                    enemyAircrafts.add(randomEnemyFactory.createEnemy());
                 }
             }
 
@@ -148,7 +140,7 @@ public class Game extends JPanel {
             // 后处理
             postProcessAction();
 
-            //每个时刻重绘界面
+            // 每个时刻重绘界面
             repaint();
 
             // 游戏结束检查英雄机是否存活
@@ -162,16 +154,16 @@ public class Game extends JPanel {
         };
 
         /*
-          以固定延迟时间进行执行
-          本次任务执行完成后，需要延迟设定的延迟时间，才会执行新的任务
+         * 以固定延迟时间进行执行
+         * 本次任务执行完成后，需要延迟设定的延迟时间，才会执行新的任务
          */
         executorService.scheduleWithFixedDelay(task, timeInterval, timeInterval, TimeUnit.MILLISECONDS);
 
     }
 
-    //***********************
-    //      Action 各部分
-    //***********************
+    // ***********************
+    // Action 各部分
+    // ***********************
 
     private boolean timeCountAndNewCycleJudge() {
         cycleTime += timeInterval;
@@ -221,7 +213,6 @@ public class Game extends JPanel {
             prop.forward();
         }
     }
-
 
     /**
      * 碰撞检测：
@@ -301,10 +292,9 @@ public class Game extends JPanel {
         props.removeIf(AbstractFlyingObject::notValid);
     }
 
-
-    //***********************
-    //      Paint 各部分
-    //***********************
+    // ***********************
+    // Paint 各部分
+    // ***********************
 
     /**
      * 重写paint方法
@@ -337,7 +327,6 @@ public class Game extends JPanel {
         g.drawImage(ImageManager.HERO_IMAGE, heroAircraft.getLocationX() - ImageManager.HERO_IMAGE.getWidth() / 2,
                 heroAircraft.getLocationY() - ImageManager.HERO_IMAGE.getHeight() / 2, null);
 
-
         // 绘制得分和生命值
         paintScoreAndLife(g);
 
@@ -365,6 +354,5 @@ public class Game extends JPanel {
         y = y + 20;
         g.drawString("LIFE:" + this.heroAircraft.getHp(), x, y);
     }
-
 
 }

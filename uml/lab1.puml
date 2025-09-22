@@ -34,7 +34,7 @@ abstract class AbstractAircraft {
     + getHp():int
     + getMaxHp():int
     + setHp(int hp):void
-    + updateShootTimer(int timeInterval):void
+    + updateShootTimer(int timeInterval):boolean
     + setShootCycle(int shootCycle):void
     + {abstract} shoot():List<BaseBullet>
 }
@@ -64,6 +64,75 @@ class HeroAircraft {
 
 AbstractAircraft <|-- HeroAircraft
 
+interface EnemyFactory {
+    + {abstract} createEnemy():AbstractEnemy
+}
+
+enum EnemyType {
+    MOB
+    ELITE
+}
+
+class RandomEnemyFactory {
+    - unifiedFactory:UnifiedEnemyFactory
+    - eliteProbability:double
+    + RandomEnemyFactory(double eliteProbability)
+    + setEliteProbability(double eliteProbability):void
+    + createEnemy():AbstractEnemy
+}
+
+class UnifiedEnemyFactory {
+    - type:EnemyType
+    - mobHp:int
+    - mobSpeedY:int
+    - eliteHp:int
+    - eliteBaseSpeedY:int
+    + UnifiedEnemyFactory()
+    + UnifiedEnemyFactory(EnemyType type)
+    + setType(EnemyType type):UnifiedEnemyFactory
+    + configMob(int hp, int speedY):UnifiedEnemyFactory
+    + configElite(int hp, int baseSpeedY):UnifiedEnemyFactory
+    + createEnemy():AbstractEnemy
+    - createMob():AbstractEnemy
+    - createElite():AbstractEnemy
+}
+
+EnemyFactory <|.. RandomEnemyFactory
+EnemyFactory <|.. UnifiedEnemyFactory
+
+interface PropFactory {
+    + {abstract} create(int x, int y):AbstractProp
+}
+
+enum PropType {
+    BLOOD
+    BOMB
+    BULLET
+}
+
+class RandomPropDropper {
+    - dropRate:double
+    - unifiedFactory:UnifiedPropFactory
+    - random:Random
+    - types:PropType[]
+    + RandomPropDropper(double dropRate)
+    + generate(int x, int y):List<AbstractProp>
+}
+
+class UnifiedPropFactory {
+    - type:PropType
+    - speedY:int
+    + UnifiedPropFactory()
+    + UnifiedPropFactory(PropType type)
+    + setType(PropType type):UnifiedPropFactory
+    + setSpeedY(int speedY):UnifiedPropFactory
+    + create(int x, int y):AbstractProp
+}
+
+PropFactory <|.. UnifiedPropFactory
+RandomPropDropper <--* EliteEnemy
+UnifiedPropFactory <--* RandomPropDropper
+
 ' 普通敌机
 class MobEnemy {
     + MobEnemy(int locationX, int locationY, int speedX, int speedY, int hp)
@@ -78,6 +147,7 @@ class EliteEnemy {
     - direction:int
     - power:int
     - propDropRate:double
+    - propDropper:RandomPropDropper
     + EliteEnemy(int locationX, int locationY, int speedX, int speedY, int hp)
     + forward():void
     + shoot():List<BaseBullet>
@@ -123,20 +193,17 @@ abstract class AbstractProp {
 
 AbstractFlyingObject <|-- AbstractProp
 
-' 火力道具：提升射击数/威力/持续时间
 class BloodProp {
     - {static} BLOOD_INCREASE:int
     + BloodProp(int locationX, int locationY, int speedX, int speedY)
     + effect(HeroAircraft heroAircraft):void
 }
 
-' 炸弹道具：触发全局清除（可触发观察者）
 class BombProp {
     + BombProp(int locationX, int locationY, int speedX, int speedY)
     + effect(HeroAircraft heroAircraft):void
 }
 
-' 加血道具
 class BulletProp {
     + BulletProp(int locationX, int locationY, int speedX, int speedY)
     + effect(HeroAircraft heroAircraft):void
