@@ -99,6 +99,7 @@ class UnifiedEnemyFactory {
 
 EnemyFactory <|.. RandomEnemyFactory
 EnemyFactory <|.. UnifiedEnemyFactory
+UnifiedEnemyFactory <--* RandomEnemyFactory
 
 interface PropFactory {
     + {abstract} create(int x, int y):AbstractProp
