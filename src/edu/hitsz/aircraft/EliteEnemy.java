@@ -4,7 +4,7 @@ import edu.hitsz.bullet.BaseBullet;
 import edu.hitsz.bullet.EnemyBullet;
 import edu.hitsz.application.Main;
 import edu.hitsz.prop.AbstractProp;
-import edu.hitsz.factory.prop.RandomPropDropper;
+import edu.hitsz.factory.prop.UnifiedPropFactory;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -28,7 +28,7 @@ public class EliteEnemy extends AbstractEnemy {
      * 道具掉落概率
      */
     private double propDropRate = 0.5;
-    private final RandomPropDropper propDropper = new RandomPropDropper(propDropRate);
+    private final UnifiedPropFactory propFactory = new UnifiedPropFactory().enableRandomDrop(propDropRate);
 
     /**
      * 精英敌机构造方法
@@ -75,7 +75,7 @@ public class EliteEnemy extends AbstractEnemy {
 
     @Override
     public List<AbstractProp> mayDrop() {
-        return propDropper.generate(this.getLocationX(), this.getLocationY());
+        return propFactory.generate(this.getLocationX(), this.getLocationY());
     }
 
 }

@@ -5,8 +5,7 @@ import edu.hitsz.bullet.BaseBullet;
 import edu.hitsz.basic.AbstractFlyingObject;
 
 import edu.hitsz.prop.AbstractProp;
-import edu.hitsz.factory.enemy.RandomEnemyFactory;
-import edu.hitsz.factory.enemy.EnemyFactory;
+import edu.hitsz.factory.enemy.UnifiedEnemyFactory;
 
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 
@@ -65,8 +64,8 @@ public class Game extends JPanel {
     private int cycleTime = 0;
     private double eliteProbability = 0.3;
 
-    // 敌机工厂（封装普通与精英概率生成）
-    private final RandomEnemyFactory randomEnemyFactory;
+    // 统一敌机工厂（内聚随机生成能力）
+    private final UnifiedEnemyFactory enemyFactory;
 
     /**
      * 游戏结束标志
@@ -85,8 +84,8 @@ public class Game extends JPanel {
 
         props = new LinkedList<>();
 
-        // 初始化随机敌机工厂
-        randomEnemyFactory = new RandomEnemyFactory(eliteProbability);
+        // 初始化统一敌机工厂并启用随机模式
+        enemyFactory = new UnifiedEnemyFactory().enableRandom(eliteProbability);
 
         /*
          * Scheduled 线程池，用于定时任务调度
@@ -115,10 +114,10 @@ public class Game extends JPanel {
             if (timeCountAndNewCycleJudge()) {
                 System.out.println(time);
                 // 新敌机产生
-
                 if (enemyAircrafts.size() < enemyMaxNumber) {
-                    randomEnemyFactory.setEliteProbability(eliteProbability);
-                    enemyAircrafts.add(randomEnemyFactory.createEnemy());
+                    // 动态调整精英概率
+                    enemyFactory.setEliteProbability(eliteProbability);
+                    enemyAircrafts.add(enemyFactory.createEnemy());
                 }
             }
 
@@ -160,6 +159,8 @@ public class Game extends JPanel {
         executorService.scheduleWithFixedDelay(task, timeInterval, timeInterval, TimeUnit.MILLISECONDS);
 
     }
+
+    // ...existing code...
 
     // ***********************
     // Action 各部分

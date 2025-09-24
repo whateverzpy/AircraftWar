@@ -7,11 +7,15 @@ import edu.hitsz.application.ImageManager;
 import edu.hitsz.application.Main;
 
 /**
- * 统一敌机工厂，通过传入类型创建不同敌机，减少多个类的重复代码
+ * 统一敌机工厂，通过传入类型创建不同敌机，或在启用随机后按概率随机创建
  */
 public class UnifiedEnemyFactory implements EnemyFactory {
 
     private EnemyType type = EnemyType.MOB;
+
+    // 随机模式配置
+    private boolean randomEnabled = false;
+    private double eliteProbability = 0.3;
 
     // 可配置的默认属性
     private int mobHp = 30;
@@ -43,8 +47,33 @@ public class UnifiedEnemyFactory implements EnemyFactory {
         return this;
     }
 
+    // 启用/配置随机生成
+    public UnifiedEnemyFactory enableRandom(double eliteProbability) {
+        this.randomEnabled = true;
+        this.eliteProbability = eliteProbability;
+        return this;
+    }
+
+    public UnifiedEnemyFactory disableRandom() {
+        this.randomEnabled = false;
+        return this;
+    }
+
+    public UnifiedEnemyFactory setEliteProbability(double eliteProbability) {
+        this.eliteProbability = eliteProbability;
+        return this;
+    }
+
     @Override
     public AbstractEnemy createEnemy() {
+        if (randomEnabled) {
+            double r = Math.random();
+            if (r < eliteProbability) {
+                return createElite();
+            } else {
+                return createMob();
+            }
+        }
         switch (type) {
             case ELITE:
                 return createElite();
