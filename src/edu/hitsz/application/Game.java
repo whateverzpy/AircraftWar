@@ -36,7 +36,7 @@ public class Game extends JPanel {
     private int timeInterval = 40;
 
     private final HeroAircraft heroAircraft;
-    private final List<AbstractAircraft> enemyAircrafts;
+    private final List<AbstractAircraft> enemyAircraft;
     private final List<BaseBullet> heroBullets;
     private final List<BaseBullet> enemyBullets;
 
@@ -75,7 +75,7 @@ public class Game extends JPanel {
     public Game() {
         heroAircraft = HeroAircraft.getInstance();
 
-        enemyAircrafts = new LinkedList<>();
+        enemyAircraft = new LinkedList<>();
         heroBullets = new LinkedList<>();
         enemyBullets = new LinkedList<>();
 
@@ -111,10 +111,10 @@ public class Game extends JPanel {
             if (timeCountAndNewCycleJudge()) {
                 System.out.println(time);
                 // 新敌机产生
-                if (enemyAircrafts.size() < enemyMaxNumber) {
+                if (enemyAircraft.size() < enemyMaxNumber) {
                     // 动态调整精英概率
                     enemyFactory.setEliteProbability(eliteProbability);
-                    enemyAircrafts.add(enemyFactory.createEnemy());
+                    enemyAircraft.add(enemyFactory.createEnemy());
                 }
             }
 
@@ -125,7 +125,7 @@ public class Game extends JPanel {
             bulletsMoveAction();
 
             // 飞机移动
-            aircraftsMoveAction();
+            aircraftMoveAction();
 
             // 道具移动
             propsMoveAction();
@@ -175,7 +175,7 @@ public class Game extends JPanel {
     private void shootAction() {
         // TODO 敌机射击
         // 敌机射击 - 每个敌机独立计时
-        for (AbstractAircraft enemyAircraft : enemyAircrafts) {
+        for (AbstractAircraft enemyAircraft : enemyAircraft) {
             if (enemyAircraft instanceof EliteEnemy) {
                 if (enemyAircraft.updateShootTimer(timeInterval)) {
                     enemyBullets.addAll(enemyAircraft.shoot());
@@ -198,8 +198,8 @@ public class Game extends JPanel {
         }
     }
 
-    private void aircraftsMoveAction() {
-        for (AbstractAircraft enemyAircraft : enemyAircrafts) {
+    private void aircraftMoveAction() {
+        for (AbstractAircraft enemyAircraft : enemyAircraft) {
             enemyAircraft.forward();
         }
     }
@@ -233,7 +233,7 @@ public class Game extends JPanel {
             if (bullet.notValid()) {
                 continue;
             }
-            for (AbstractAircraft enemyAircraft : enemyAircrafts) {
+            for (AbstractAircraft enemyAircraft : enemyAircraft) {
                 if (enemyAircraft.notValid()) {
                     // 已被其他子弹击毁的敌机，不再检测
                     // 避免多个子弹重复击毁同一敌机的判定
@@ -284,7 +284,7 @@ public class Game extends JPanel {
     private void postProcessAction() {
         enemyBullets.removeIf(AbstractFlyingObject::notValid);
         heroBullets.removeIf(AbstractFlyingObject::notValid);
-        enemyAircrafts.removeIf(AbstractFlyingObject::notValid);
+        enemyAircraft.removeIf(AbstractFlyingObject::notValid);
         props.removeIf(AbstractFlyingObject::notValid);
     }
 
@@ -315,7 +315,7 @@ public class Game extends JPanel {
         paintImageWithPositionRevised(g, enemyBullets);
         paintImageWithPositionRevised(g, heroBullets);
 
-        paintImageWithPositionRevised(g, enemyAircrafts);
+        paintImageWithPositionRevised(g, enemyAircraft);
 
         // 绘制道具
         paintImageWithPositionRevised(g, props);
