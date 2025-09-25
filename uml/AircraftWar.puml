@@ -55,7 +55,9 @@ class HeroAircraft {
     - shootNum:int
     - power:int
     - direction:int
-    + HeroAircraft(int locationX, int locationY, int speedX, int speedY, int hp)
+    - instance:HeroAircraft
+    - HeroAircraft(int locationX, int locationY, int speedX, int speedY, int hp)
+    + getInstance():HeroAircraft
     + getShootNum():int
     + setShootNum(int shootNum):void
     + forward():void
@@ -73,16 +75,10 @@ enum EnemyType {
     ELITE
 }
 
-class RandomEnemyFactory {
-    - unifiedFactory:UnifiedEnemyFactory
-    - eliteProbability:double
-    + RandomEnemyFactory(double eliteProbability)
-    + setEliteProbability(double eliteProbability):void
-    + createEnemy():AbstractEnemy
-}
-
 class UnifiedEnemyFactory {
     - type:EnemyType
+    - randomEnabled:boolean
+    - eliteProbability:double
     - mobHp:int
     - mobSpeedY:int
     - eliteHp:int
@@ -92,14 +88,18 @@ class UnifiedEnemyFactory {
     + setType(EnemyType type):UnifiedEnemyFactory
     + configMob(int hp, int speedY):UnifiedEnemyFactory
     + configElite(int hp, int baseSpeedY):UnifiedEnemyFactory
+    + enableRandom(double eliteProbability):UnifiedEnemyFactory
+    + disableRandom():UnifiedEnemyFactory
+    + setEliteProbability(double eliteProbability):UnifiedEnemyFactory
     + createEnemy():AbstractEnemy
     - createMob():AbstractEnemy
     - createElite():AbstractEnemy
 }
 
-EnemyFactory <|.. RandomEnemyFactory
 EnemyFactory <|.. UnifiedEnemyFactory
-UnifiedEnemyFactory <--* RandomEnemyFactory
+
+EliteEnemy <.. UnifiedEnemyFactory
+MobEnemy <.. UnifiedEnemyFactory
 
 interface PropFactory {
     + {abstract} create(int x, int y):AbstractProp
@@ -111,28 +111,29 @@ enum PropType {
     BULLET
 }
 
-class RandomPropDropper {
-    - dropRate:double
-    - unifiedFactory:UnifiedPropFactory
-    - random:Random
-    - types:PropType[]
-    + RandomPropDropper(double dropRate)
-    + generate(int x, int y):List<AbstractProp>
-}
-
 class UnifiedPropFactory {
     - type:PropType
     - speedY:int
+    - randomEnabled:boolean
+    - dropRate:double
+    - random:Random
+    - types:PropType[]
     + UnifiedPropFactory()
     + UnifiedPropFactory(PropType type)
     + setType(PropType type):UnifiedPropFactory
     + setSpeedY(int speedY):UnifiedPropFactory
+    + enableRandomDrop(double dropRate):UnifiedPropFactory
+    + disableRandomDrop():UnifiedPropFactory
+    + setDropRate(double dropRate):UnifiedPropFactory
     + create(int x, int y):AbstractProp
+    + generate(int x, int y):List<AbstractProp>
 }
 
 PropFactory <|.. UnifiedPropFactory
-RandomPropDropper <--* EliteEnemy
-UnifiedPropFactory <--* RandomPropDropper
+
+BloodProp <.. UnifiedPropFactory
+BombProp <.. UnifiedPropFactory
+BulletProp <.. UnifiedPropFactory
 
 ' 普通敌机
 class MobEnemy {
@@ -148,7 +149,7 @@ class EliteEnemy {
     - direction:int
     - power:int
     - propDropRate:double
-    - propDropper:RandomPropDropper
+    - propFactory:UnifiedPropFactory
     + EliteEnemy(int locationX, int locationY, int speedX, int speedY, int hp)
     + forward():void
     + shoot():List<BaseBullet>

@@ -31,15 +31,41 @@ public class HeroAircraft extends AbstractAircraft {
     private int direction = -1;
 
     /**
+     * 单例模式实例
+     */
+    private static volatile HeroAircraft instance = null;
+
+    /**
+     * 构造函数私有化
+     *
      * @param locationX 英雄机位置x坐标
      * @param locationY 英雄机位置y坐标
      * @param speedX    英雄机射出的子弹的基准速度（英雄机无特定速度）
      * @param speedY    英雄机射出的子弹的基准速度（英雄机无特定速度）
      * @param hp        初始生命值
      */
-    public HeroAircraft(int locationX, int locationY, int speedX, int speedY, int hp) {
+    private HeroAircraft(int locationX, int locationY, int speedX, int speedY, int hp) {
         super(locationX, locationY, speedX, speedY, hp);
         this.shootCycle = 100;
+    }
+
+    /**
+     * 获取英雄机单例（双重检查锁定）
+     *
+     * @return 英雄机实例
+     */
+    public static HeroAircraft getInstance() {
+        if (instance == null) {
+            synchronized (HeroAircraft.class) {
+                if (instance == null) {
+                    instance = new HeroAircraft(
+                            edu.hitsz.application.Main.WINDOW_WIDTH / 2,
+                            edu.hitsz.application.Main.WINDOW_HEIGHT - edu.hitsz.application.ImageManager.HERO_IMAGE.getHeight(),
+                            0, 0, 100);
+                }
+            }
+        }
+        return instance;
     }
 
     public int getShootNum() {
