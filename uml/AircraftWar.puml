@@ -1,218 +1,229 @@
 @startuml
-' 基础抽象飞行物
-abstract class AbstractFlyingObject {
-    # locationX:int
-    # locationY:int
-    # speedX:int
-    # speedY:int
-    # image:BufferedImage
-    # width:int
-    # height:int
-    # isValid:boolean
-    + AbstractFlyingObject(int locationX, int locationY, int speedX, int speedY)
-    + forward():void
-    + crash(AbstractFlyingObject flyingObject):boolean
-    + getLocationX():int
-    + getLocationY():int
-    + setLocation(double locationX, double locationY):void
-    + getSpeedY():int
-    + getImage():BufferedImage
-    + getWidth():int
-    + getHeight():int
-    + notValid():boolean
-    + vanish():void
+' 基础抽象组
+package "basic" {
+    abstract class AbstractFlyingObject {
+        # locationX:int
+        # locationY:int
+        # speedX:int
+        # speedY:int
+        # image:BufferedImage
+        # width:int
+        # height:int
+        # isValid:boolean
+        + AbstractFlyingObject(int locationX, int locationY, int speedX, int speedY)
+        + forward():void
+        + crash(AbstractFlyingObject flyingObject):boolean
+        + getLocationX():int
+        + getLocationY():int
+        + setLocation(double locationX, double locationY):void
+        + getSpeedY():int
+        + getImage():BufferedImage
+        + getWidth():int
+        + getHeight():int
+        + notValid():boolean
+        + vanish():void
+    }
 }
 
-' 飞机抽象（英雄与敌机共同父类）
-abstract class AbstractAircraft {
-    # maxHp:int
-    # hp:int
-    # shootCycle:int
-    # shootTimer:int
-    + AbstractAircraft(int locationX, int locationY, int speedX, int speedY, int hp)
-    + decreaseHp(int decrease):void
-    + getHp():int
-    + getMaxHp():int
-    + setHp(int hp):void
-    + updateShootTimer(int timeInterval):boolean
-    + setShootCycle(int shootCycle):void
-    + {abstract} shoot():List<BaseBullet>
+package "bullet" {
+    ' 子弹抽象
+    abstract class BaseBullet {
+        - power:int
+        + BaseBullet(int locationX, int locationY, int speedX, int speedY, int power)
+        + forward():void
+        + getPower():int
+    }
+    AbstractFlyingObject <|-- BaseBullet
+
+    class HeroBullet {
+        + HeroBullet(int locationX, int locationY, int speedX, int speedY, int power)
+    }
+
+    class EnemyBullet {
+        + EnemyBullet(int locationX, int locationY, int speedX, int speedY, int power)
+    }
+
+    BaseBullet <|-- HeroBullet
+    BaseBullet <|-- EnemyBullet
 }
 
-AbstractFlyingObject <|-- AbstractAircraft
+package "aircraft" {
+    ' 飞机抽象（英雄与敌机共同父类）
+    abstract class AbstractAircraft {
+        # maxHp:int
+        # hp:int
+        # shootCycle:int
+        # shootTimer:int
+        + AbstractAircraft(int locationX, int locationY, int speedX, int speedY, int hp)
+        + decreaseHp(int decrease):void
+        + getHp():int
+        + getMaxHp():int
+        + setHp(int hp):void
+        + updateShootTimer(int timeInterval):boolean
+        + setShootCycle(int shootCycle):void
+        + {abstract} shoot():List<BaseBullet>
+    }
 
-' 敌机抽象，便于将来扩展精英、Boss 行为（如策略、掉落）
-abstract class AbstractEnemy {
-    + AbstractEnemy(int locationX, int locationY, int speedX, int speedY, int hp)
-    + {abstract} getScore():int
-    + {abstract} mayDrop():List<AbstractProp>
+    AbstractFlyingObject <|-- AbstractAircraft
+
+    ' 英雄机
+    class HeroAircraft {
+        - shootNum:int
+        - power:int
+        - direction:int
+        - instance:HeroAircraft
+        - HeroAircraft(int locationX, int locationY, int speedX, int speedY, int hp)
+        + getInstance():HeroAircraft
+        + getShootNum():int
+        + setShootNum(int shootNum):void
+        + forward():void
+        + shoot():List<BaseBullet>
+    }
+
+    AbstractAircraft <|-- HeroAircraft
+
+    ' 敌机抽象，便于将来扩展精英、Boss 行为（如策略、掉落）
+    abstract class AbstractEnemy {
+        + AbstractEnemy(int locationX, int locationY, int speedX, int speedY, int hp)
+        + {abstract} getScore():int
+        + {abstract} mayDrop():List<AbstractProp>
+    }
+
+    ' 普通敌机
+    class MobEnemy {
+        + MobEnemy(int locationX, int locationY, int speedX, int speedY, int hp)
+        + forward():void
+        + shoot():List<BaseBullet>
+        + getScore():int
+        + mayDrop():List<AbstractProp>
+    }
+
+    ' 精英敌机（射击更频繁/子弹更强，可掉落道具）
+    class EliteEnemy {
+        - direction:int
+        - power:int
+        - propDropRate:double
+        - propFactory:UnifiedPropFactory
+        + EliteEnemy(int locationX, int locationY, int speedX, int speedY, int hp)
+        + forward():void
+        + shoot():List<BaseBullet>
+        + getScore():int
+        + mayDrop():List<AbstractProp>
+    }
 }
 
-AbstractAircraft <|-- AbstractEnemy
+package "prop" {
+    ' 道具抽象
+    abstract class AbstractProp {
+        + AbstractProp(int locationX, int locationY, int speedX, int speedY)
+        + forward():void
+        + {abstract} effect(HeroAircraft heroAircraft):void
+    }
 
-' 英雄机
-class HeroAircraft {
-    - shootNum:int
-    - power:int
-    - direction:int
-    - instance:HeroAircraft
-    - HeroAircraft(int locationX, int locationY, int speedX, int speedY, int hp)
-    + getInstance():HeroAircraft
-    + getShootNum():int
-    + setShootNum(int shootNum):void
-    + forward():void
-    + shoot():List<BaseBullet>
+    AbstractFlyingObject <|-- AbstractProp
+
+    class BloodProp {
+        - {static} BLOOD_INCREASE:int
+        + BloodProp(int locationX, int locationY, int speedX, int speedY)
+        + effect(HeroAircraft heroAircraft):void
+    }
+
+    class BombProp {
+        + BombProp(int locationX, int locationY, int speedX, int speedY)
+        + effect(HeroAircraft heroAircraft):void
+    }
+
+    class BulletProp {
+        + BulletProp(int locationX, int locationY, int speedX, int speedY)
+        + effect(HeroAircraft heroAircraft):void
+    }
+
+    AbstractProp <|-- BloodProp
+    AbstractProp <|-- BombProp
+    AbstractProp <|-- BulletProp
 }
 
-AbstractAircraft <|-- HeroAircraft
+package "factory.enemy" {
+    interface EnemyFactory {
+        + {abstract} createEnemy():AbstractEnemy
+    }
 
-interface EnemyFactory {
-    + {abstract} createEnemy():AbstractEnemy
+    enum EnemyType {
+        MOB
+        ELITE
+    }
+
+    class UnifiedEnemyFactory {
+        - type:EnemyType
+        - randomEnabled:boolean
+        - eliteProbability:double
+        - mobHp:int
+        - mobSpeedY:int
+        - eliteHp:int
+        - eliteBaseSpeedY:int
+        + UnifiedEnemyFactory()
+        + UnifiedEnemyFactory(EnemyType type)
+        + setType(EnemyType type):UnifiedEnemyFactory
+        + configMob(int hp, int speedY):UnifiedEnemyFactory
+        + configElite(int hp, int baseSpeedY):UnifiedEnemyFactory
+        + enableRandom(double eliteProbability):UnifiedEnemyFactory
+        + disableRandom():UnifiedEnemyFactory
+        + setEliteProbability(double eliteProbability):UnifiedEnemyFactory
+        + createEnemy():AbstractEnemy
+        - createMob():AbstractEnemy
+        - createElite():AbstractEnemy
+    }
+
+    AbstractAircraft <|-- AbstractEnemy
+
+    EnemyFactory <|.. UnifiedEnemyFactory
+
+    EliteEnemy <.. UnifiedEnemyFactory
+    MobEnemy <.. UnifiedEnemyFactory
+
+    ' BossEnemy 预留（暂不实现）
+    ' class BossEnemy {
+    ' }
+
+    AbstractEnemy <|-- MobEnemy
+    AbstractEnemy <|-- EliteEnemy
+    ' AbstractEnemy <|-- BossEnemy  (预留)
 }
 
-enum EnemyType {
-    MOB
-    ELITE
+package "factory.prop" {
+    interface PropFactory {
+        + {abstract} create(int x, int y):AbstractProp
+    }
+
+    enum PropType {
+        BLOOD
+        BOMB
+        BULLET
+    }
+
+    class UnifiedPropFactory {
+        - type:PropType
+        - speedY:int
+        - randomEnabled:boolean
+        - dropRate:double
+        - random:Random
+        - types:PropType[]
+        + UnifiedPropFactory()
+        + UnifiedPropFactory(PropType type)
+        + setType(PropType type):UnifiedPropFactory
+        + setSpeedY(int speedY):UnifiedPropFactory
+        + enableRandomDrop(double dropRate):UnifiedPropFactory
+        + disableRandomDrop():UnifiedPropFactory
+        + setDropRate(double dropRate):UnifiedPropFactory
+        + create(int x, int y):AbstractProp
+        + generate(int x, int y):List<AbstractProp>
+    }
+
+    PropFactory <|.. UnifiedPropFactory
+
+    BloodProp <.. UnifiedPropFactory
+    BombProp <.. UnifiedPropFactory
+    BulletProp <.. UnifiedPropFactory
 }
-
-class UnifiedEnemyFactory {
-    - type:EnemyType
-    - randomEnabled:boolean
-    - eliteProbability:double
-    - mobHp:int
-    - mobSpeedY:int
-    - eliteHp:int
-    - eliteBaseSpeedY:int
-    + UnifiedEnemyFactory()
-    + UnifiedEnemyFactory(EnemyType type)
-    + setType(EnemyType type):UnifiedEnemyFactory
-    + configMob(int hp, int speedY):UnifiedEnemyFactory
-    + configElite(int hp, int baseSpeedY):UnifiedEnemyFactory
-    + enableRandom(double eliteProbability):UnifiedEnemyFactory
-    + disableRandom():UnifiedEnemyFactory
-    + setEliteProbability(double eliteProbability):UnifiedEnemyFactory
-    + createEnemy():AbstractEnemy
-    - createMob():AbstractEnemy
-    - createElite():AbstractEnemy
-}
-
-EnemyFactory <|.. UnifiedEnemyFactory
-
-EliteEnemy <.. UnifiedEnemyFactory
-MobEnemy <.. UnifiedEnemyFactory
-
-interface PropFactory {
-    + {abstract} create(int x, int y):AbstractProp
-}
-
-enum PropType {
-    BLOOD
-    BOMB
-    BULLET
-}
-
-class UnifiedPropFactory {
-    - type:PropType
-    - speedY:int
-    - randomEnabled:boolean
-    - dropRate:double
-    - random:Random
-    - types:PropType[]
-    + UnifiedPropFactory()
-    + UnifiedPropFactory(PropType type)
-    + setType(PropType type):UnifiedPropFactory
-    + setSpeedY(int speedY):UnifiedPropFactory
-    + enableRandomDrop(double dropRate):UnifiedPropFactory
-    + disableRandomDrop():UnifiedPropFactory
-    + setDropRate(double dropRate):UnifiedPropFactory
-    + create(int x, int y):AbstractProp
-    + generate(int x, int y):List<AbstractProp>
-}
-
-PropFactory <|.. UnifiedPropFactory
-
-BloodProp <.. UnifiedPropFactory
-BombProp <.. UnifiedPropFactory
-BulletProp <.. UnifiedPropFactory
-
-' 普通敌机
-class MobEnemy {
-    + MobEnemy(int locationX, int locationY, int speedX, int speedY, int hp)
-    + forward():void
-    + shoot():List<BaseBullet>
-    + getScore():int
-    + mayDrop():List<AbstractProp>
-}
-
-' 精英敌机（射击更频繁/子弹更强，可掉落道具）
-class EliteEnemy {
-    - direction:int
-    - power:int
-    - propDropRate:double
-    - propFactory:UnifiedPropFactory
-    + EliteEnemy(int locationX, int locationY, int speedX, int speedY, int hp)
-    + forward():void
-    + shoot():List<BaseBullet>
-    + getScore():int
-    + mayDrop():List<AbstractProp>
-}
-
-' BossEnemy 预留（暂不实现）
-' class BossEnemy {
-' }
-
-AbstractEnemy <|-- MobEnemy
-AbstractEnemy <|-- EliteEnemy
-' AbstractEnemy <|-- BossEnemy  (预留)
-
-' 子弹抽象
-abstract class BaseBullet {
-    - power:int
-    + BaseBullet(int locationX, int locationY, int speedX, int speedY, int power)
-    + forward():void
-    + getPower():int
-}
-
-AbstractFlyingObject <|-- BaseBullet
-
-class HeroBullet {
-    + HeroBullet(int locationX, int locationY, int speedX, int speedY, int power)
-}
-
-class EnemyBullet {
-    + EnemyBullet(int locationX, int locationY, int speedX, int speedY, int power)
-}
-
-BaseBullet <|-- HeroBullet
-BaseBullet <|-- EnemyBullet
-
-' 道具抽象
-abstract class AbstractProp {
-    + AbstractProp(int locationX, int locationY, int speedX, int speedY)
-    + forward():void
-    + {abstract} effect(HeroAircraft heroAircraft):void
-}
-
-AbstractFlyingObject <|-- AbstractProp
-
-class BloodProp {
-    - {static} BLOOD_INCREASE:int
-    + BloodProp(int locationX, int locationY, int speedX, int speedY)
-    + effect(HeroAircraft heroAircraft):void
-}
-
-class BombProp {
-    + BombProp(int locationX, int locationY, int speedX, int speedY)
-    + effect(HeroAircraft heroAircraft):void
-}
-
-class BulletProp {
-    + BulletProp(int locationX, int locationY, int speedX, int speedY)
-    + effect(HeroAircraft heroAircraft):void
-}
-
-AbstractProp <|-- BloodProp
-AbstractProp <|-- BombProp
-AbstractProp <|-- BulletProp
 
 @enduml
