@@ -4,6 +4,7 @@ import edu.hitsz.aircraft.AbstractEnemy;
 import edu.hitsz.aircraft.MobEnemy;
 import edu.hitsz.aircraft.EliteEnemy;
 import edu.hitsz.aircraft.ElitePlusEnemy;
+import edu.hitsz.aircraft.BossEnemy;
 import edu.hitsz.application.ImageManager;
 import edu.hitsz.application.Main;
 
@@ -26,6 +27,8 @@ public class UnifiedEnemyFactory implements EnemyFactory {
     private int eliteBaseSpeedY = 10;
     private int elitePlusHp = 100;
     private int elitePlusBaseSpeedY = 8;
+    private int bossHp = 500;
+    private int bossSpeedX = 5;
 
     public UnifiedEnemyFactory() {
     }
@@ -54,6 +57,12 @@ public class UnifiedEnemyFactory implements EnemyFactory {
     public UnifiedEnemyFactory configElitePlus(int hp, int baseSpeedY) {
         this.elitePlusHp = hp;
         this.elitePlusBaseSpeedY = baseSpeedY;
+        return this;
+    }
+
+    public UnifiedEnemyFactory configBoss(int hp, int speedX) {
+        this.bossHp = hp;
+        this.bossSpeedX = speedX;
         return this;
     }
 
@@ -93,6 +102,8 @@ public class UnifiedEnemyFactory implements EnemyFactory {
             }
         }
         switch (type) {
+            case BOSS:
+                return createBoss();
             case ELITE_PLUS:
                 return createElitePlus();
             case ELITE:
@@ -121,5 +132,11 @@ public class UnifiedEnemyFactory implements EnemyFactory {
         int y = (int) (Math.random() * Main.WINDOW_HEIGHT * 0.05);
         int speedX = (int) (Math.random() * 10 - 5);
         return new ElitePlusEnemy(x, y, speedX, elitePlusBaseSpeedY, elitePlusHp);
+    }
+
+    private AbstractEnemy createBoss() {
+        int x = (int) (Math.random() * (Main.WINDOW_WIDTH - ImageManager.BOSS_ENEMY_IMAGE.getWidth()));
+        int y = (int) (Math.random() * Main.WINDOW_HEIGHT * 0.05);
+        return new BossEnemy(x, y, bossSpeedX, 0, bossHp);
     }
 }

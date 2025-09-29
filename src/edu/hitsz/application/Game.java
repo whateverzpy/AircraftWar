@@ -65,6 +65,9 @@ public class Game extends JPanel {
     private double eliteProbability = 0.3;
     private double elitePlusProbability = 0.1;
 
+    private boolean bossExists = false;
+    private int bossScoreThreshold = 200;
+
     // 统一敌机工厂（内聚随机生成能力）
     private final UnifiedEnemyFactory enemyFactory;
 
@@ -110,8 +113,26 @@ public class Game extends JPanel {
             // 周期性执行（控制频率）
             if (timeCountAndNewCycleJudge()) {
                 System.out.println(time);
+
+                // 如果Boss不存在，并且分数达到阈值，则生成Boss
+                if (!bossExists && score >= bossScoreThreshold) {
+                    // 临时关闭随机模式，强制创建 Boss
+                    enemyFactory.disableRandom();
+                    enemyAircraft.add(
+                            enemyFactory
+                                    .setType(edu.hitsz.factory.enemy.EnemyType.BOSS)
+                                    .createEnemy()
+                    );
+
+                    // 还原随机模式，使用当前动态概率
+                    enemyFactory.enableRandom(eliteProbability, elitePlusProbability);
+
+                    bossExists = true;
+                    System.out.println("A boss is coming!");
+                }
+
                 // 新敌机产生
-                if (enemyAircraft.size() < enemyMaxNumber) {
+                else if (enemyAircraft.size() < enemyMaxNumber && !bossExists) {
                     // 动态调整精英概率
                     eliteProbability = Math.min(0.4, 0.2 + time / 60000.0);
                     elitePlusProbability = Math.min(0.2, 0.1 + time / 120000.0);
@@ -179,7 +200,7 @@ public class Game extends JPanel {
         // TODO 敌机射击
         // 敌机射击 - 每个敌机独立计时
         for (AbstractAircraft enemyAircraft : enemyAircraft) {
-            if (enemyAircraft instanceof EliteEnemy || enemyAircraft instanceof ElitePlusEnemy) {
+            if (enemyAircraft instanceof EliteEnemy || enemyAircraft instanceof ElitePlusEnemy || enemyAircraft instanceof BossEnemy) {
                 if (enemyAircraft.updateShootTimer(timeInterval)) {
                     enemyBullets.addAll(enemyAircraft.shoot());
                 }
@@ -254,6 +275,13 @@ public class Game extends JPanel {
                             score += enemy.getScore();
                             // 敌机掉落道具
                             props.addAll(enemy.mayDrop());
+
+                            // 如果击败的是Boss，重置标志并提高下一次出现的阈值
+                            if (enemy instanceof edu.hitsz.aircraft.BossEnemy) {
+                                bossExists = false;
+                                bossScoreThreshold += 200; // 增加下一次出现所需分数
+                                System.out.println("Boss has been defeated!");
+                            }
                         }
                     }
                 }
