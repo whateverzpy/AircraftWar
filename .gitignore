@@ -52,3 +52,6 @@ replay_pid*
 
 # Local environment config
 .env
+
+# 实验额外的与项目无关的文件
+Strass*
