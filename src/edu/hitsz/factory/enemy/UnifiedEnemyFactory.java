@@ -1,8 +1,9 @@
 package edu.hitsz.factory.enemy;
 
 import edu.hitsz.aircraft.AbstractEnemy;
-import edu.hitsz.aircraft.EliteEnemy;
 import edu.hitsz.aircraft.MobEnemy;
+import edu.hitsz.aircraft.EliteEnemy;
+import edu.hitsz.aircraft.ElitePlusEnemy;
 import edu.hitsz.application.ImageManager;
 import edu.hitsz.application.Main;
 
@@ -16,12 +17,15 @@ public class UnifiedEnemyFactory implements EnemyFactory {
     // 随机模式配置
     private boolean randomEnabled = false;
     private double eliteProbability = 0.3;
+    private double elitePlusProbability = 0.1;
 
     // 可配置的默认属性
     private int mobHp = 30;
     private int mobSpeedY = 10;
     private int eliteHp = 60;
     private int eliteBaseSpeedY = 10;
+    private int elitePlusHp = 100;
+    private int elitePlusBaseSpeedY = 8;
 
     public UnifiedEnemyFactory() {
     }
@@ -47,10 +51,17 @@ public class UnifiedEnemyFactory implements EnemyFactory {
         return this;
     }
 
+    public UnifiedEnemyFactory configElitePlus(int hp, int baseSpeedY) {
+        this.elitePlusHp = hp;
+        this.elitePlusBaseSpeedY = baseSpeedY;
+        return this;
+    }
+
     // 启用/配置随机生成
-    public UnifiedEnemyFactory enableRandom(double eliteProbability) {
+    public UnifiedEnemyFactory enableRandom(double eliteProbability, double elitePlusProbability) {
         this.randomEnabled = true;
         this.eliteProbability = eliteProbability;
+        this.elitePlusProbability = elitePlusProbability;
         return this;
     }
 
@@ -64,17 +75,26 @@ public class UnifiedEnemyFactory implements EnemyFactory {
         return this;
     }
 
+    public UnifiedEnemyFactory setElitePlusProbability(double elitePlusProbability) {
+        this.elitePlusProbability = elitePlusProbability;
+        return this;
+    }
+
     @Override
     public AbstractEnemy createEnemy() {
         if (randomEnabled) {
             double r = Math.random();
-            if (r < eliteProbability) {
+            if (r < elitePlusProbability) {
+                return createElitePlus();
+            } else if (r < elitePlusProbability + eliteProbability) {
                 return createElite();
             } else {
                 return createMob();
             }
         }
         switch (type) {
+            case ELITE_PLUS:
+                return createElitePlus();
             case ELITE:
                 return createElite();
             case MOB:
@@ -94,5 +114,12 @@ public class UnifiedEnemyFactory implements EnemyFactory {
         int y = (int) (Math.random() * Main.WINDOW_HEIGHT * 0.05);
         int speedX = (int) (Math.random() * 20 - 10);
         return new EliteEnemy(x, y, speedX, eliteBaseSpeedY, eliteHp);
+    }
+
+    private AbstractEnemy createElitePlus() {
+        int x = (int) (Math.random() * (Main.WINDOW_WIDTH - ImageManager.ELITE_PLUS_ENEMY_IMAGE.getWidth()));
+        int y = (int) (Math.random() * Main.WINDOW_HEIGHT * 0.05);
+        int speedX = (int) (Math.random() * 10 - 5);
+        return new ElitePlusEnemy(x, y, speedX, elitePlusBaseSpeedY, elitePlusHp);
     }
 }

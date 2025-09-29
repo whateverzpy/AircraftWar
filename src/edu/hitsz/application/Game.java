@@ -63,6 +63,7 @@ public class Game extends JPanel {
     private int cycleDuration = 600;
     private int cycleTime = 0;
     private double eliteProbability = 0.3;
+    private double elitePlusProbability = 0.1;
 
     // 统一敌机工厂（内聚随机生成能力）
     private final UnifiedEnemyFactory enemyFactory;
@@ -82,8 +83,7 @@ public class Game extends JPanel {
         props = new LinkedList<>();
 
         // 初始化统一敌机工厂并启用随机模式
-        enemyFactory = new UnifiedEnemyFactory().enableRandom(eliteProbability);
-
+        enemyFactory = new UnifiedEnemyFactory().enableRandom(eliteProbability, elitePlusProbability);
         /*
          * Scheduled 线程池，用于定时任务调度
          * 关于alibaba code guide：可命名的 ThreadFactory 一般需要第三方包
@@ -113,7 +113,10 @@ public class Game extends JPanel {
                 // 新敌机产生
                 if (enemyAircraft.size() < enemyMaxNumber) {
                     // 动态调整精英概率
+                    eliteProbability = Math.min(0.4, 0.2 + time / 60000.0);
+                    elitePlusProbability = Math.min(0.2, 0.1 + time / 120000.0);
                     enemyFactory.setEliteProbability(eliteProbability);
+                    enemyFactory.setElitePlusProbability(elitePlusProbability);
                     enemyAircraft.add(enemyFactory.createEnemy());
                 }
             }
@@ -176,7 +179,7 @@ public class Game extends JPanel {
         // TODO 敌机射击
         // 敌机射击 - 每个敌机独立计时
         for (AbstractAircraft enemyAircraft : enemyAircraft) {
-            if (enemyAircraft instanceof EliteEnemy) {
+            if (enemyAircraft instanceof EliteEnemy || enemyAircraft instanceof ElitePlusEnemy) {
                 if (enemyAircraft.updateShootTimer(timeInterval)) {
                     enemyBullets.addAll(enemyAircraft.shoot());
                 }
