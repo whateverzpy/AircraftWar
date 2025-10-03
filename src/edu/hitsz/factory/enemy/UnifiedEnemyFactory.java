@@ -136,7 +136,7 @@ public class UnifiedEnemyFactory implements EnemyFactory {
 
     private AbstractEnemy createBoss() {
         int x = (int) (Math.random() * (Main.WINDOW_WIDTH - ImageManager.BOSS_ENEMY_IMAGE.getWidth()));
-        int y = (int) (Math.random() * Main.WINDOW_HEIGHT * 0.05);
+        int y = (int) (ImageManager.BOSS_ENEMY_IMAGE.getHeight() / 2.0);
         return new BossEnemy(x, y, bossSpeedX, 0, bossHp);
     }
 }
