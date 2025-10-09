@@ -16,6 +16,7 @@ package "basic" {
         + getLocationX():int
         + getLocationY():int
         + setLocation(double locationX, double locationY):void
+        + getSpeedX():int
         + getSpeedY():int
         + getImage():BufferedImage
         + getWidth():int
@@ -52,6 +53,10 @@ package "aircraft" {
     abstract class AbstractAircraft {
         # maxHp:int
         # hp:int
+        # shootStrategy:ShootStrategy
+        # direction:int
+        # shootNum:int
+        # power:int
         # shootCycle:int
         # shootTimer:int
         + AbstractAircraft(int locationX, int locationY, int speedX, int speedY, int hp)
@@ -60,8 +65,9 @@ package "aircraft" {
         + getMaxHp():int
         + setHp(int hp):void
         + updateShootTimer(int timeInterval):boolean
+        + setShootStrategy(ShootStrategy shootStrategy):void
         + setShootCycle(int shootCycle):void
-        + {abstract} shoot():List<BaseBullet>
+        + shoot():List<BaseBullet>
     }
 
     AbstractFlyingObject <|-- AbstractAircraft
@@ -71,9 +77,9 @@ package "aircraft" {
         - shootNum:int
         - power:int
         - direction:int
-        - instance:HeroAircraft
+        - {static} instance:HeroAircraft
         - HeroAircraft(int locationX, int locationY, int speedX, int speedY, int hp)
-        + getInstance():HeroAircraft
+        + {static} getInstance():HeroAircraft
         + getShootNum():int
         + setShootNum(int shootNum):void
         + forward():void
@@ -110,6 +116,31 @@ package "aircraft" {
         + getScore():int
         + mayDrop():List<AbstractProp>
     }
+
+    class ElitePlusEnemy {
+        - direction:int
+        - power:int
+        - propDropRate:double
+        - propFactory:UnifiedPropFactory
+        + ElitePlusEnemy(int locationX, int locationY, int speedX, int speedY, int hp)
+        + forward():void
+        + shoot():List<BaseBullet>
+        + getScore():int
+        + mayDrop():List<AbstractProp>
+    }
+
+    class BossEnemy {
+        - power:int
+        - shootNum:int
+        - minDrop:int
+        - maxDrop:int
+        - propFactory:UnifiedPropFactory
+        - random:Random
+        + BossEnemy(int locationX, int locationY, int speedX, int speedY, int hp)
+        + shoot():List<BaseBullet>
+        + getScore():int
+        + mayDrop():List<AbstractProp>
+    }
 }
 
 package "prop" {
@@ -138,9 +169,15 @@ package "prop" {
         + effect(HeroAircraft heroAircraft):void
     }
 
+    class BulletPlusProp {
+        + BulletPlusProp(int locationX, int locationY, int speedX, int speedY)
+        + effect(HeroAircraft heroAircraft):void
+    }
+
     AbstractProp <|-- BloodProp
     AbstractProp <|-- BombProp
     AbstractProp <|-- BulletProp
+    AbstractProp <|-- BulletPlusProp
 }
 
 package "factory.enemy" {
@@ -151,27 +188,39 @@ package "factory.enemy" {
     enum EnemyType {
         MOB
         ELITE
+        ELITE_PLUS
+        BOSS
     }
 
     class UnifiedEnemyFactory {
         - type:EnemyType
         - randomEnabled:boolean
         - eliteProbability:double
+        - elitePlusProbability:double
         - mobHp:int
         - mobSpeedY:int
         - eliteHp:int
         - eliteBaseSpeedY:int
+        - elitePlusHp:int
+        - elitePlusBaseSpeedY:int
+        - bossHp:int
+        - bossSpeedX:int
         + UnifiedEnemyFactory()
         + UnifiedEnemyFactory(EnemyType type)
         + setType(EnemyType type):UnifiedEnemyFactory
         + configMob(int hp, int speedY):UnifiedEnemyFactory
         + configElite(int hp, int baseSpeedY):UnifiedEnemyFactory
+        + configElitePlus(int hp, int baseSpeedY):UnifiedEnemyFactory
+        + configBoss(int hp, int speedX):UnifiedEnemyFactory
         + enableRandom(double eliteProbability):UnifiedEnemyFactory
         + disableRandom():UnifiedEnemyFactory
         + setEliteProbability(double eliteProbability):UnifiedEnemyFactory
+        + setElitePlusProbability(double elitePlusProbability):UnifiedEnemyFactory
         + createEnemy():AbstractEnemy
         - createMob():AbstractEnemy
         - createElite():AbstractEnemy
+        - createElitePlus():AbstractEnemy
+        - createBoss():AbstractEnemy
     }
 
     AbstractAircraft <|-- AbstractEnemy
@@ -180,14 +229,13 @@ package "factory.enemy" {
 
     EliteEnemy <.. UnifiedEnemyFactory
     MobEnemy <.. UnifiedEnemyFactory
-
-    ' BossEnemy 预留（暂不实现）
-    ' class BossEnemy {
-    ' }
+    ElitePlusEnemy <.. UnifiedEnemyFactory
+    BossEnemy <.. UnifiedEnemyFactory
 
     AbstractEnemy <|-- MobEnemy
     AbstractEnemy <|-- EliteEnemy
-    ' AbstractEnemy <|-- BossEnemy  (预留)
+    AbstractEnemy <|-- ElitePlusEnemy
+    AbstractEnemy <|-- BossEnemy
 }
 
 package "factory.prop" {
@@ -199,6 +247,7 @@ package "factory.prop" {
         BLOOD
         BOMB
         BULLET
+        BULLET_PLUS
     }
 
     class UnifiedPropFactory {
@@ -224,6 +273,62 @@ package "factory.prop" {
     BloodProp <.. UnifiedPropFactory
     BombProp <.. UnifiedPropFactory
     BulletProp <.. UnifiedPropFactory
+    BulletPlusProp <.. UnifiedPropFactory
+}
+
+package strategy {
+    interface ShootStrategy {
+        + {abstract} shoot(int locationX, int locationY, int speedX, int speedY, int direction, int shootNum, int power):List<BaseBullet>
+    }
+
+    class DirectShoot {
+        + shoot(int locationX, int locationY, int speedX, int speedY, int direction, int shootNum, int power):List<BaseBullet>
+    }
+
+    class ScatterShoot {
+        + shoot(int locationX, int locationY, int speedX, int speedY, int direction, int shootNum, int power):List<BaseBullet>
+    }
+
+    class CircleShoot {
+        + shoot(int locationX, int locationY, int speedX, int speedY, int direction, int shootNum, int power):List<BaseBullet>
+    }
+
+    ShootStrategy <|.. DirectShoot
+    ShootStrategy <|.. ScatterShoot
+    ShootStrategy <|.. CircleShoot
+
+    ShootStrategy <-o AbstractAircraft
+}
+
+package dao {
+    interface ScoreDao {
+        + {abstract} addScore(ScoreRecord record):void
+        + {abstract} getAllScores():List<ScoreRecord>
+    }
+
+    class FileScoreDaoImpl {
+        - filePath:String
+        + FileScoreDaoImpl(String filePath)
+        + addScore(ScoreRecord record):void
+        + getAllScores():List<ScoreRecord>
+        - saveScores(List<ScoreRecord> scores):void
+    }
+
+    class ScoreRecord {
+        - {static} serialVersionUID:long
+        - playerName:String
+        - score:int
+        - recordTime:Date
+        + ScoreRecord(String playerName, int score)
+        + getPlayerName():String
+        + getScore():int
+        + getFormattedTime():String
+        + compareTo(ScoreRecord other):int
+        + toString():String
+    }
+
+    ScoreDao <|.. FileScoreDaoImpl
+    ScoreRecord <-- FileScoreDaoImpl
 }
 
 @enduml

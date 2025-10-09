@@ -2,6 +2,7 @@ package edu.hitsz.aircraft;
 
 import edu.hitsz.bullet.BaseBullet;
 import edu.hitsz.basic.AbstractFlyingObject;
+import edu.hitsz.strategy.ShootStrategy;
 
 import java.util.List;
 
@@ -21,6 +22,26 @@ public abstract class AbstractAircraft extends AbstractFlyingObject {
      * 当前生命值
      */
     protected int hp;
+
+    /**
+     * 射击策略
+     */
+    protected ShootStrategy shootStrategy;
+
+    /**
+     * 射击方向 (向上: -1, 向下: 1)
+     */
+    protected int direction = 1;
+
+    /**
+     * 子弹数量
+     */
+    protected int shootNum = 1;
+
+    /**
+     * 子弹威力
+     */
+    protected int power = 10;
 
     /**
      * 射击间隔周期
@@ -93,6 +114,15 @@ public abstract class AbstractAircraft extends AbstractFlyingObject {
     }
 
     /**
+     * 设置射击策略
+     *
+     * @param shootStrategy 射击策略
+     */
+    public void setShootStrategy(ShootStrategy shootStrategy) {
+        this.shootStrategy = shootStrategy;
+    }
+
+    /**
      * 设置射击周期
      *
      * @param shootCycle 射击周期
@@ -106,8 +136,18 @@ public abstract class AbstractAircraft extends AbstractFlyingObject {
      *
      * @return 可射击对象需实现，返回子弹，非可射击对象空实现，返回 null
      */
-    public abstract List<BaseBullet> shoot();
+    public List<BaseBullet> shoot() {
+        if (shootStrategy == null) {
+            return null;
+        }
+        return shootStrategy.shoot(
+                this.getLocationX(),
+                this.getLocationY(),
+                this.getSpeedX(),
+                this.getSpeedY(),
+                this.direction,
+                this.shootNum,
+                this.power);
+    }
 
 }
-
-

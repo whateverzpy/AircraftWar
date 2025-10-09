@@ -5,6 +5,7 @@ import edu.hitsz.bullet.BaseBullet;
 import edu.hitsz.bullet.EnemyBullet;
 import edu.hitsz.factory.prop.UnifiedPropFactory;
 import edu.hitsz.prop.AbstractProp;
+import edu.hitsz.strategy.ScatterShoot;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -18,11 +19,11 @@ public class ElitePlusEnemy extends AbstractEnemy {
     /**
      * 射击方向 (向下为正)
      */
-    private final int direction = 1;
+    private int direction = 1;
     /**
      * 子弹伤害
      */
-    private final int power = 30;
+    private int power = 30;
 
     /**
      * 道具掉落概率
@@ -39,6 +40,10 @@ public class ElitePlusEnemy extends AbstractEnemy {
      */
     public ElitePlusEnemy(int locationX, int locationY, int speedX, int speedY, int hp) {
         super(locationX, locationY, speedX, speedY, hp);
+        this.shootNum = 3; // 扇形射击，子弹数量为3
+        this.power = 30;
+        this.direction = 1;
+        this.shootStrategy = new ScatterShoot();
         this.shootCycle = 800; // 射击周期
     }
 
@@ -52,23 +57,18 @@ public class ElitePlusEnemy extends AbstractEnemy {
     }
 
     /**
-     * 扇形射击，同时发射三颗子弹
+     * 扇形射击，委托给策略实现
      */
     @Override
     public List<BaseBullet> shoot() {
-        List<BaseBullet> res = new LinkedList<>();
-        int x = this.getLocationX();
-        int y = this.getLocationY() + direction * 2;
-        int speedY = this.getSpeedY() + direction * 5;
-
-        // 左侧子弹
-        res.add(new EnemyBullet(x, y, -2, speedY, power));
-        // 中间子弹
-        res.add(new EnemyBullet(x, y, 0, speedY, power));
-        // 右侧子弹
-        res.add(new EnemyBullet(x, y, 2, speedY, power));
-
-        return res;
+        return shootStrategy.shoot(
+                this.getLocationX(),
+                this.getLocationY() + direction * 2,
+                this.getSpeedX(),
+                this.getSpeedY(),
+                this.direction,
+                this.shootNum,
+                this.power);
     }
 
     @Override

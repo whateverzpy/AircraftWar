@@ -7,6 +7,10 @@ import edu.hitsz.basic.AbstractFlyingObject;
 import edu.hitsz.prop.AbstractProp;
 import edu.hitsz.factory.enemy.UnifiedEnemyFactory;
 
+import edu.hitsz.dao.FileScoreDaoImpl;
+import edu.hitsz.dao.ScoreDao;
+import edu.hitsz.dao.ScoreRecord;
+
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 
 import javax.swing.*;
@@ -72,6 +76,11 @@ public class Game extends JPanel {
     private final UnifiedEnemyFactory enemyFactory;
 
     /**
+     * 得分数据访问对象
+     */
+    private final ScoreDao scoreDao;
+
+    /**
      * 游戏结束标志
      */
     private boolean gameOverFlag = false;
@@ -84,6 +93,9 @@ public class Game extends JPanel {
         enemyBullets = new LinkedList<>();
 
         props = new LinkedList<>();
+
+        // 初始化 DAO
+        scoreDao = new FileScoreDaoImpl("ranklist_db/scores.dat");
 
         // 初始化统一敌机工厂并启用随机模式
         enemyFactory = new UnifiedEnemyFactory().enableRandom(eliteProbability, elitePlusProbability);
@@ -121,8 +133,7 @@ public class Game extends JPanel {
                     enemyAircraft.add(
                             enemyFactory
                                     .setType(edu.hitsz.factory.enemy.EnemyType.BOSS)
-                                    .createEnemy()
-                    );
+                                    .createEnemy());
 
                     // 还原随机模式，使用当前动态概率
                     enemyFactory.enableRandom(eliteProbability, elitePlusProbability);
@@ -169,6 +180,9 @@ public class Game extends JPanel {
                 executorService.shutdown();
                 gameOverFlag = true;
                 System.out.println("Game Over!");
+
+                // 处理得分和排行榜
+                handleGameOver();
             }
 
         };
@@ -185,6 +199,30 @@ public class Game extends JPanel {
     // Action 各部分
     // ***********************
 
+    private void handleGameOver() {
+        // 弹出输入框获取玩家姓名
+        String playerName = JOptionPane.showInputDialog(this, "游戏结束! 请输入你的名字:", "匿名玩家");
+        if (playerName == null || playerName.trim().isEmpty()) {
+            playerName = "匿名玩家";
+        }
+
+        // 创建并保存得分记录
+        ScoreRecord record = new ScoreRecord(playerName, this.score);
+        scoreDao.addScore(record);
+
+        // 获取、排序并打印排行榜
+        List<ScoreRecord> scores = scoreDao.getAllScores();
+        Collections.sort(scores); // 按分数降序排序
+
+        System.out.println("***************** 得分排行榜 *****************");
+        for (int i = 0; i < scores.size(); i++) {
+            ScoreRecord r = scores.get(i);
+            System.out.printf("第 %d 名: %s，%d，%s%n",
+                    i + 1, r.getPlayerName(), r.getScore(), r.getFormattedTime());
+        }
+        System.out.println("*******************************************");
+    }
+
     private boolean timeCountAndNewCycleJudge() {
         cycleTime += timeInterval;
         if (cycleTime >= cycleDuration) {
@@ -200,7 +238,8 @@ public class Game extends JPanel {
         // TODO 敌机射击
         // 敌机射击 - 每个敌机独立计时
         for (AbstractAircraft enemyAircraft : enemyAircraft) {
-            if (enemyAircraft instanceof EliteEnemy || enemyAircraft instanceof ElitePlusEnemy || enemyAircraft instanceof BossEnemy) {
+            if (enemyAircraft instanceof EliteEnemy || enemyAircraft instanceof ElitePlusEnemy
+                    || enemyAircraft instanceof BossEnemy) {
                 if (enemyAircraft.updateShootTimer(timeInterval)) {
                     enemyBullets.addAll(enemyAircraft.shoot());
                 }

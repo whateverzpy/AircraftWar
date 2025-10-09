@@ -2,6 +2,7 @@ package edu.hitsz.aircraft;
 
 import edu.hitsz.bullet.BaseBullet;
 import edu.hitsz.bullet.HeroBullet;
+import edu.hitsz.strategy.DirectShoot;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -46,6 +47,10 @@ public class HeroAircraft extends AbstractAircraft {
      */
     private HeroAircraft(int locationX, int locationY, int speedX, int speedY, int hp) {
         super(locationX, locationY, speedX, speedY, hp);
+        this.shootNum = 1;
+        this.power = 30;
+        this.direction = -1;
+        this.shootStrategy = new DirectShoot();
         this.shootCycle = 100;
     }
 
@@ -60,7 +65,8 @@ public class HeroAircraft extends AbstractAircraft {
                 if (instance == null) {
                     instance = new HeroAircraft(
                             edu.hitsz.application.Main.WINDOW_WIDTH / 2,
-                            edu.hitsz.application.Main.WINDOW_HEIGHT - edu.hitsz.application.ImageManager.HERO_IMAGE.getHeight(),
+                            edu.hitsz.application.Main.WINDOW_HEIGHT
+                                    - edu.hitsz.application.ImageManager.HERO_IMAGE.getHeight(),
                             0, 0, 100);
                 }
             }
@@ -82,25 +88,20 @@ public class HeroAircraft extends AbstractAircraft {
     }
 
     /**
-     * 英雄机射击，子弹一次发射数量由 shootNum 控制
+     * 英雄机射击，具体实现委托给射击策略
      *
      * @return 射出的子弹 List
      */
     @Override
     public List<BaseBullet> shoot() {
-        List<BaseBullet> res = new LinkedList<>();
-        int x = this.getLocationX();
-        int y = this.getLocationY() + direction * 2;
-        int speedX = 0;
-        int speedY = this.getSpeedY() + direction * 5;
-        BaseBullet bullet;
-        for (int i = 0; i < shootNum; i++) {
-            // 子弹发射位置相对飞机位置向前偏移
-            // 多个子弹横向分散
-            bullet = new HeroBullet(x + (i * 2 - shootNum + 1) * 10, y, speedX, speedY, power);
-            res.add(bullet);
-        }
-        return res;
+        return shootStrategy.shoot(
+                this.getLocationX(),
+                this.getLocationY() + direction * 2, // 子弹从机头射出
+                0, // 英雄机子弹不继承飞机速度
+                this.getSpeedY(),
+                this.direction,
+                this.shootNum,
+                this.power);
     }
 
 }

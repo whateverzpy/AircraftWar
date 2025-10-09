@@ -13,7 +13,7 @@ import java.awt.image.BufferedImage;
  */
 public abstract class AbstractFlyingObject {
 
-    //locationX、locationY为图片中心位置坐标
+    // locationX、locationY为图片中心位置坐标
     /**
      * x 轴坐标
      */
@@ -23,7 +23,6 @@ public abstract class AbstractFlyingObject {
      * y 轴坐标
      */
     protected int locationY;
-
 
     /**
      * x 轴移动速度
@@ -52,7 +51,6 @@ public abstract class AbstractFlyingObject {
      * -1 表示未设置
      */
     protected int height = -1;
-
 
     /**
      * 有效（生存）标记，
@@ -97,10 +95,10 @@ public abstract class AbstractFlyingObject {
      */
     public boolean crash(AbstractFlyingObject flyingObject) {
         // 缩放因子，用于控制 y轴方向区域范围
-        int factor = this instanceof AbstractAircraft ? 2 : 1; //我方
-        int fFactor = flyingObject instanceof AbstractAircraft ? 2 : 1;//对方
+        int factor = this instanceof AbstractAircraft ? 2 : 1; // 我方
+        int fFactor = flyingObject instanceof AbstractAircraft ? 2 : 1;// 对方
 
-        //对方坐标、宽度、高度
+        // 对方坐标、宽度、高度
         int x = flyingObject.getLocationX();
         int y = flyingObject.getLocationY();
         int fWidth = flyingObject.getWidth();
@@ -123,6 +121,10 @@ public abstract class AbstractFlyingObject {
     public void setLocation(double locationX, double locationY) {
         this.locationX = (int) locationX;
         this.locationY = (int) locationY;
+    }
+
+    public int getSpeedX() {
+        return speedX;
     }
 
     public int getSpeedY() {
@@ -166,4 +168,3 @@ public abstract class AbstractFlyingObject {
     }
 
 }
-

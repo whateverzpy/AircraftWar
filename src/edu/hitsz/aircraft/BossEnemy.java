@@ -6,6 +6,7 @@ import edu.hitsz.bullet.EnemyBullet;
 import edu.hitsz.factory.prop.PropType;
 import edu.hitsz.factory.prop.UnifiedPropFactory;
 import edu.hitsz.prop.AbstractProp;
+import edu.hitsz.strategy.CircleShoot;
 
 import edu.hitsz.application.ImageManager;
 
@@ -22,11 +23,11 @@ public class BossEnemy extends AbstractEnemy {
     /**
      * 子弹伤害
      */
-    private final int power = 40;
+    private int power = 40;
     /**
      * 射击方向 (环形)
      */
-    private final int shootNum = 20;
+    private int shootNum = 20;
     /**
      * 道具掉落数量范围
      */
@@ -38,27 +39,26 @@ public class BossEnemy extends AbstractEnemy {
 
     public BossEnemy(int locationX, int locationY, int speedX, int speedY, int hp) {
         super(locationX, locationY, speedX, speedY, hp);
+        this.shootNum = 20;
+        this.power = 40;
+        this.direction = 1;
+        this.shootStrategy = new CircleShoot();
         this.shootCycle = 1000; // 射击周期
     }
 
     /**
-     * 环形射击，同时发射多颗子弹
+     * 环形射击，委托给策略实现
      */
     @Override
     public List<BaseBullet> shoot() {
-        List<BaseBullet> res = new ArrayList<>();
-        int x = this.getLocationX();
-        int y = this.getLocationY();
-        int bulletSpeed = 6;
-        double angleStep = 360.0 / shootNum;
-
-        for (int i = 0; i < shootNum; i++) {
-            double angle = Math.toRadians(i * angleStep);
-            int speedX = (int) (bulletSpeed * Math.sin(angle));
-            int speedY = (int) (bulletSpeed * Math.cos(angle));
-            res.add(new EnemyBullet(x, y, speedX, speedY, power));
-        }
-        return res;
+        return shootStrategy.shoot(
+                this.getLocationX(),
+                this.getLocationY(),
+                this.getSpeedX(),
+                this.getSpeedY(),
+                this.direction,
+                this.shootNum,
+                this.power);
     }
 
     @Override
@@ -75,9 +75,8 @@ public class BossEnemy extends AbstractEnemy {
         // 计算最大道具宽度与安全间距，确保横向不重叠
         int maxPropWidth = Math.max(
                 ImageManager.PROP_BLOOD_IMAGE.getWidth(),
-                Math.max(ImageManager.PROP_BOMB_IMAGE.getWidth(), ImageManager.PROP_BULLET_IMAGE.getWidth())
-        );
-        int spacing = Math.max(40, maxPropWidth + 10);   // 额外留 10px 缝隙
+                Math.max(ImageManager.PROP_BOMB_IMAGE.getWidth(), ImageManager.PROP_BULLET_IMAGE.getWidth()));
+        int spacing = Math.max(40, maxPropWidth + 10); // 额外留 10px 缝隙
         int halfMax = maxPropWidth / 2;
 
         int baseX = this.getLocationX();

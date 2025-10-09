@@ -5,6 +5,7 @@ import edu.hitsz.bullet.EnemyBullet;
 import edu.hitsz.application.Main;
 import edu.hitsz.prop.AbstractProp;
 import edu.hitsz.factory.prop.UnifiedPropFactory;
+import edu.hitsz.strategy.DirectShoot;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -41,6 +42,10 @@ public class EliteEnemy extends AbstractEnemy {
      */
     public EliteEnemy(int locationX, int locationY, int speedX, int speedY, int hp) {
         super(locationX, locationY, speedX, speedY, hp);
+        this.shootNum = 1;
+        this.power = 25;
+        this.direction = 1;
+        this.shootStrategy = new DirectShoot();
         this.shootCycle = 800;
     }
 
@@ -56,16 +61,14 @@ public class EliteEnemy extends AbstractEnemy {
 
     @Override
     public List<BaseBullet> shoot() {
-        List<BaseBullet> res = new LinkedList<>();
-        int x = this.getLocationX();
-        int y = this.getLocationY() + direction * 2;
-        int speedX = 0;
-        int speedY = this.getSpeedY() + direction * 5;
-        BaseBullet bullet;
-        // 精英敌机一次发射一颗子弹
-        bullet = new EnemyBullet(x, y, speedX, speedY, power);
-        res.add(bullet);
-        return res;
+        return shootStrategy.shoot(
+                this.getLocationX(),
+                this.getLocationY() + direction * 2,
+                this.getSpeedX(),
+                this.getSpeedY(),
+                this.direction,
+                this.shootNum,
+                this.power);
     }
 
     @Override

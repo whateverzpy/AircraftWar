@@ -60,6 +60,8 @@ public class UnifiedPropFactory implements PropFactory {
                 return new BombProp(x, y, 0, speedY);
             case BULLET:
                 return new BulletProp(x, y, 0, speedY);
+            case BULLET_PLUS:
+                return new BulletPlusProp(x, y, 0, speedY);
             case BLOOD:
             default:
                 return new BloodProp(x, y, 0, speedY);
