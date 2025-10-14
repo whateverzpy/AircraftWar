@@ -28,6 +28,7 @@ import java.util.concurrent.*;
 public class Game extends JPanel {
 
     private int backGroundTop = 0;
+    private final BufferedImage backgroundImage;
 
     /**
      * Scheduled 线程池，用于任务调度
@@ -85,7 +86,22 @@ public class Game extends JPanel {
      */
     private boolean gameOverFlag = false;
 
-    public Game() {
+    public Game(String difficulty) {
+        switch (difficulty) {
+            case "Easy":
+                this.backgroundImage = ImageManager.BACKGROUND_IMAGE_EASY;
+                // TODO: 参数设置
+                break;
+            case "Hard":
+                this.backgroundImage = ImageManager.BACKGROUND_IMAGE_HARD;
+                // TODO: 参数设置
+                break;
+            case "Normal":
+            default:
+                this.backgroundImage = ImageManager.BACKGROUND_IMAGE_NORMAL;
+                // TODO: 参数设置
+                break;
+        }
         heroAircraft = HeroAircraft.getInstance();
 
         enemyAircraft = new LinkedList<>();
@@ -373,8 +389,8 @@ public class Game extends JPanel {
         super.paint(g);
 
         // 绘制背景,图片滚动
-        g.drawImage(ImageManager.BACKGROUND_IMAGE, 0, this.backGroundTop - Main.WINDOW_HEIGHT, null);
-        g.drawImage(ImageManager.BACKGROUND_IMAGE, 0, this.backGroundTop, null);
+        g.drawImage(backgroundImage, 0, this.backGroundTop - Main.WINDOW_HEIGHT, null);
+        g.drawImage(backgroundImage, 0, this.backGroundTop, null);
         this.backGroundTop += 1;
         if (this.backGroundTop == Main.WINDOW_HEIGHT) {
             this.backGroundTop = 0;

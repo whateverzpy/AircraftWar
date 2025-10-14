@@ -27,9 +27,8 @@ public class Main {
                 WINDOW_WIDTH, WINDOW_HEIGHT);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        Game game = new Game();
-        frame.add(game);
+        StartMenu startMenu = new StartMenu(frame);
+        frame.add(startMenu);
         frame.setVisible(true);
-        game.action();
     }
 }
