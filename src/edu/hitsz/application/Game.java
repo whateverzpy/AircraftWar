@@ -86,11 +86,14 @@ public class Game extends JPanel {
      */
     private boolean gameOverFlag = false;
 
+    private final String difficulty;
+
     private final boolean soundEnabled;
     private MusicThread bgmThread;
     private MusicThread bossBgmThread;
 
     public Game(String difficulty, boolean soundEnabled) {
+        this.difficulty = difficulty;
         this.soundEnabled = soundEnabled;
         switch (difficulty) {
             case "Easy":
@@ -254,6 +257,16 @@ public class Game extends JPanel {
         // 创建并保存得分记录
         ScoreRecord record = new ScoreRecord(playerName, this.score);
         scoreDao.addScore(record);
+
+        // 切换到排行榜界面
+        SwingUtilities.invokeLater(() -> {
+            JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(this);
+            frame.getContentPane().removeAll();
+            Score scorePanel = new Score(this.difficulty);
+            frame.add(scorePanel);
+            frame.revalidate();
+            frame.repaint();
+        });
 
         // 获取、排序并打印排行榜
         List<ScoreRecord> scores = scoreDao.getAllScores();
