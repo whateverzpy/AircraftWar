@@ -28,7 +28,7 @@ public class Score extends JPanel {
         this.difficulty.setText(difficultyStr);
 
         // 初始化表格模型
-        String[] columnNames = { "排名", "玩家", "得分", "记录时间" };
+        String[] columnNames = {"排名", "玩家", "得分", "记录时间"};
         tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -51,7 +51,7 @@ public class Score extends JPanel {
                     List<ScoreRecord> scores = scoreDao.getAllScores();
                     Collections.sort(scores);
                     scores.remove(selectedRow);
-                    saveScores(scores);
+                    scoreDao.saveAll(scores);
 
                     // 刷新表格
                     loadScoreData();
@@ -75,23 +75,12 @@ public class Score extends JPanel {
         // 填充新数据
         for (int i = 0; i < scores.size(); i++) {
             ScoreRecord r = scores.get(i);
-            tableModel.addRow(new Object[] {
+            tableModel.addRow(new Object[]{
                     i + 1,
                     r.getPlayerName(),
                     r.getScore(),
                     r.getFormattedTime()
             });
-        }
-    }
-
-    private void saveScores(List<ScoreRecord> scores) {
-        // 由于 ScoreDao 没有提供直接覆盖保存的方法，这里通过清空再逐一添加的方式模拟
-        // 注意：这是一种效率较低的实现，更好的方式是在 DAO 中提供一个 `saveAll` 方法
-        try (java.io.ObjectOutputStream oos = new java.io.ObjectOutputStream(
-                new java.io.FileOutputStream("ranklist_db/scores.dat"))) {
-            oos.writeObject(scores);
-        } catch (java.io.IOException e) {
-            System.err.println("Error saving score file: " + e.getMessage());
         }
     }
 }

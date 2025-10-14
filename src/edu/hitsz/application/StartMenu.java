@@ -18,7 +18,7 @@ public class StartMenu extends JPanel {
 
     public StartMenu(JFrame frame) {
         this.mainFrame = frame;
-        
+
         this.add(panel1);
 
         // 为按钮添加事件监听器

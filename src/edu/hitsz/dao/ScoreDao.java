@@ -19,4 +19,11 @@ public interface ScoreDao {
      * @return 得分记录列表
      */
     List<ScoreRecord> getAllScores();
+
+    /**
+     * 保存所有得分记录，覆盖现有记录
+     *
+     * @param scores 得分记录列表
+     */
+    void saveAll(List<ScoreRecord> scores);
 }

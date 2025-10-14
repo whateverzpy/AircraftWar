@@ -25,7 +25,7 @@ public class FileScoreDaoImpl implements ScoreDao {
     public void addScore(ScoreRecord record) {
         List<ScoreRecord> scores = getAllScores();
         scores.add(record);
-        saveScores(scores);
+        saveAll(scores);
     }
 
     @Override
@@ -42,6 +42,15 @@ public class FileScoreDaoImpl implements ScoreDao {
             // 文件损坏或内容不兼容时返回空列表
             System.err.println("Error reading score file: " + e.getMessage());
             return new ArrayList<>();
+        }
+    }
+
+    @Override
+    public void saveAll(List<ScoreRecord> scores) {
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(filePath))) {
+            oos.writeObject(scores);
+        } catch (IOException e) {
+            System.err.println("Error saving score file: " + e.getMessage());
         }
     }
 
