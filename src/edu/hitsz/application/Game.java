@@ -86,7 +86,12 @@ public class Game extends JPanel {
      */
     private boolean gameOverFlag = false;
 
-    public Game(String difficulty) {
+    private final boolean soundEnabled;
+    private MusicThread bgmThread;
+    private MusicThread bossBgmThread;
+
+    public Game(String difficulty, boolean soundEnabled) {
+        this.soundEnabled = soundEnabled;
         switch (difficulty) {
             case "Easy":
                 this.backgroundImage = ImageManager.BACKGROUND_IMAGE_EASY;
@@ -115,6 +120,13 @@ public class Game extends JPanel {
 
         // 初始化统一敌机工厂并启用随机模式
         enemyFactory = new UnifiedEnemyFactory().enableRandom(eliteProbability, elitePlusProbability);
+
+        if (soundEnabled) {
+            bgmThread = new MusicThread("src/videos/bgm.wav");
+            bgmThread.setLoop(true);
+            bgmThread.start();
+        }
+
         /*
          * Scheduled 线程池，用于定时任务调度
          * 关于alibaba code guide：可命名的 ThreadFactory 一般需要第三方包
@@ -155,6 +167,14 @@ public class Game extends JPanel {
                     enemyFactory.enableRandom(eliteProbability, elitePlusProbability);
 
                     bossExists = true;
+                    if (soundEnabled) {
+                        if (bgmThread != null) {
+                            bgmThread.stopMusic();
+                        }
+                        bossBgmThread = new MusicThread("src/videos/bgm_boss.wav");
+                        bossBgmThread.setLoop(true);
+                        bossBgmThread.start();
+                    }
                     System.out.println("A boss is coming!");
                 }
 
@@ -195,6 +215,15 @@ public class Game extends JPanel {
                 // 游戏结束
                 executorService.shutdown();
                 gameOverFlag = true;
+                if (soundEnabled) {
+                    if (bgmThread != null) {
+                        bgmThread.stopMusic();
+                    }
+                    if (bossBgmThread != null) {
+                        bossBgmThread.stopMusic();
+                    }
+                    new MusicThread("src/videos/game_over.wav").start();
+                }
                 System.out.println("Game Over!");
 
                 // 处理得分和排行榜
@@ -237,6 +266,14 @@ public class Game extends JPanel {
                     i + 1, r.getPlayerName(), r.getScore(), r.getFormattedTime());
         }
         System.out.println("*******************************************");
+        if (soundEnabled) {
+            if (bgmThread != null) {
+                bgmThread.stopMusic();
+            }
+            if (bossBgmThread != null) {
+                bossBgmThread.stopMusic();
+            }
+        }
     }
 
     private boolean timeCountAndNewCycleJudge() {
@@ -323,6 +360,9 @@ public class Game extends JPanel {
                     // 敌机损失一定生命值
                     enemyAircraft.decreaseHp(bullet.getPower());
                     bullet.vanish();
+                    if (soundEnabled) {
+                        new MusicThread("src/videos/bullet_hit.wav").start();
+                    }
                     if (enemyAircraft.notValid()) {
                         // TODO 获得分数，产生道具补给
                         if (enemyAircraft instanceof AbstractEnemy) {
@@ -335,6 +375,14 @@ public class Game extends JPanel {
                             if (enemy instanceof edu.hitsz.aircraft.BossEnemy) {
                                 bossExists = false;
                                 bossScoreThreshold += 200; // 增加下一次出现所需分数
+                                if (soundEnabled) {
+                                    if (bossBgmThread != null) {
+                                        bossBgmThread.stopMusic();
+                                    }
+                                    bgmThread = new MusicThread("src/videos/bgm.wav");
+                                    bgmThread.setLoop(true);
+                                    bgmThread.start();
+                                }
                                 System.out.println("Boss has been defeated!");
                             }
                         }
@@ -354,6 +402,13 @@ public class Game extends JPanel {
                 continue;
             }
             if (heroAircraft.crash(prop)) {
+                if (soundEnabled) {
+                    if (prop instanceof edu.hitsz.prop.BombProp) {
+                        new MusicThread("src/videos/bomb_explosion.wav").start();
+                    } else {
+                        new MusicThread("src/videos/get_supply.wav").start();
+                    }
+                }
                 prop.effect(heroAircraft);
                 prop.vanish();
             }

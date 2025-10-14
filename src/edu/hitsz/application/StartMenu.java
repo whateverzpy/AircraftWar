@@ -37,7 +37,7 @@ public class StartMenu extends JPanel {
     private void startGame(String difficulty) {
         mainFrame.getContentPane().removeAll();
         // 注意：您可能需要将 soundEnabled 状态传递给 Game 对象
-        Game game = new Game(difficulty);
+        Game game = new Game(difficulty, soundEnabled);
         mainFrame.add(game);
         mainFrame.revalidate();
         mainFrame.repaint();
