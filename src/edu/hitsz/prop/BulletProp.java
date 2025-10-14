@@ -4,6 +4,8 @@ import edu.hitsz.aircraft.HeroAircraft;
 import edu.hitsz.strategy.ScatterShoot;
 
 public class BulletProp extends AbstractProp {
+    private static final int DURATION = 4000;
+
     public BulletProp(int locationX, int locationY, int speedX, int speedY) {
         super(locationX, locationY, speedX, speedY);
     }
@@ -11,8 +13,6 @@ public class BulletProp extends AbstractProp {
     @Override
     public void effect(HeroAircraft heroAircraft) {
         System.out.println("FireSupply active! Change to ScatterShoot.");
-        heroAircraft.setShootStrategy(new ScatterShoot());
-        // 临时增加子弹数量以适配散射
-        heroAircraft.setShootNum(3);
+        heroAircraft.activatePowerUp(new ScatterShoot(), 3, DURATION);
     }
 }

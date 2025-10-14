@@ -3,6 +3,7 @@ package edu.hitsz.aircraft;
 import edu.hitsz.bullet.BaseBullet;
 import edu.hitsz.bullet.HeroBullet;
 import edu.hitsz.strategy.DirectShoot;
+import edu.hitsz.strategy.ShootStrategy;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -35,6 +36,11 @@ public class HeroAircraft extends AbstractAircraft {
      * 单例模式实例
      */
     private static volatile HeroAircraft instance = null;
+
+    /**
+     * 火力道具计时器线程
+     */
+    private volatile Thread powerUpTimer = null;
 
     /**
      * 构造函数私有化
@@ -80,6 +86,47 @@ public class HeroAircraft extends AbstractAircraft {
 
     public void setShootNum(int shootNum) {
         this.shootNum = shootNum;
+    }
+
+    /**
+     * 激活火力道具，设置新的射击策略并启动一个计时器，在持续时间结束后恢复默认。
+     * 如果已有火力道具效果正在生效，会先中断旧的计时器。
+     *
+     * @param strategy 新的射击策略
+     * @param shootNum 新的子弹数量
+     * @param duration 效果持续时间 (ms)
+     */
+    public void activatePowerUp(ShootStrategy strategy, int shootNum, int duration) {
+        // 如果已有火力道具计时器在运行，则中断它
+        if (powerUpTimer != null && powerUpTimer.isAlive()) {
+            powerUpTimer.interrupt();
+        }
+
+        // 设置新的射击策略和子弹数量
+        this.setShootStrategy(strategy);
+        this.setShootNum(shootNum);
+
+        // 创建并启动新的计时器线程
+        powerUpTimer = new Thread(() -> {
+            try {
+                Thread.sleep(duration);
+                // 持续时间到，恢复默认射击模式
+                System.out.println("Power-up expired. Reverting to DirectShoot.");
+                revertToDefaultShoot();
+            } catch (InterruptedException e) {
+                // 计时器被中断（例如，因为获得了新的火力道具），提前结束
+                System.out.println("Power-up timer interrupted.");
+            }
+        });
+        powerUpTimer.start();
+    }
+
+    /**
+     * 恢复为默认的直射模式
+     */
+    public void revertToDefaultShoot() {
+        this.setShootStrategy(new DirectShoot());
+        this.setShootNum(1);
     }
 
     @Override
