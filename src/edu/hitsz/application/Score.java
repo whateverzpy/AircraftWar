@@ -10,6 +10,8 @@ import java.awt.*;
 import java.util.Collections;
 import java.util.List;
 
+import javax.swing.table.DefaultTableCellRenderer;
+
 public class Score extends JPanel {
     private JPanel Panel;
     private JPanel flowLayout;
@@ -24,8 +26,16 @@ public class Score extends JPanel {
     private DefaultTableModel tableModel;
 
     public Score(String difficultyStr) {
+        // 将“排行榜”标题居中
+        rank.setHorizontalAlignment(SwingConstants.CENTER);
+        // 将“排行榜”设置为红色
+        rank.setForeground(Color.RED);
+
         this.scoreDao = new FileScoreDaoImpl("ranklist_db/scores.dat");
-        this.difficulty.setText(difficultyStr);
+        // 将难度信息合并到 difficultyLabel 中
+        this.difficultyLabel.setText("难度：" + difficultyStr);
+        // 隐藏原有的 difficulty 标签
+        this.difficulty.setVisible(false);
 
         // 初始化表格模型
         String[] columnNames = {"排名", "玩家", "得分", "记录时间"};
@@ -37,6 +47,10 @@ public class Score extends JPanel {
         };
         scoreTable.setModel(tableModel);
         scoreTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION); // 单选模式
+        // 设置单元格内容居中
+        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+        centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
+        scoreTable.setDefaultRenderer(Object.class, centerRenderer);
 
         // 加载并显示数据
         loadScoreData();
