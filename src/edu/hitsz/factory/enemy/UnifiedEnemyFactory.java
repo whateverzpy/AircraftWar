@@ -27,7 +27,7 @@ public class UnifiedEnemyFactory implements EnemyFactory {
     private int eliteBaseSpeedY = 10;
     private int elitePlusHp = 100;
     private int elitePlusBaseSpeedY = 8;
-    private int bossHp = 500;
+    private int bossHp = 2000;
     private int bossSpeedX = 5;
 
     public UnifiedEnemyFactory() {

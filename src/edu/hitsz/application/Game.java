@@ -71,7 +71,7 @@ public class Game extends JPanel {
     private double elitePlusProbability = 0.1;
 
     private boolean bossExists = false;
-    private int bossScoreThreshold = 200;
+    private int bossScoreThreshold = 500;
 
     // 统一敌机工厂（内聚随机生成能力）
     private final UnifiedEnemyFactory enemyFactory;
@@ -387,7 +387,7 @@ public class Game extends JPanel {
                             // 如果击败的是Boss，重置标志并提高下一次出现的阈值
                             if (enemy instanceof edu.hitsz.aircraft.BossEnemy) {
                                 bossExists = false;
-                                bossScoreThreshold += 200; // 增加下一次出现所需分数
+                                bossScoreThreshold += 500; // 增加下一次出现所需分数
                                 if (soundEnabled) {
                                     if (bossBgmThread != null) {
                                         bossBgmThread.stopMusic();
