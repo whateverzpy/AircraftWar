@@ -3,6 +3,8 @@ package edu.hitsz.aircraft;
 import edu.hitsz.application.Main;
 import edu.hitsz.bullet.BaseBullet;
 import edu.hitsz.prop.AbstractProp;
+import edu.hitsz.observer.BombPublisher;
+import edu.hitsz.observer.BombSubscriber;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -13,7 +15,7 @@ import java.util.List;
  *
  * @author hitsz
  */
-public class MobEnemy extends AbstractEnemy {
+public class MobEnemy extends AbstractEnemy implements BombSubscriber {
 
     /**
      * 普通敌机构造方法
@@ -26,7 +28,9 @@ public class MobEnemy extends AbstractEnemy {
      */
     public MobEnemy(int locationX, int locationY, int speedX, int speedY, int hp) {
         super(locationX, locationY, speedX, speedY, hp);
-        // 普通敌机不可射击，策略为null
+        // 注册为炸弹观察者
+        BombPublisher.register(this);
+        // 普通敌机不可射击
         this.shootStrategy = null;
     }
 
@@ -54,5 +58,14 @@ public class MobEnemy extends AbstractEnemy {
     public List<AbstractProp> mayDrop() {
         // 普通敌机不掉落道具
         return new LinkedList<>();
+    }
+
+    @Override
+    public int onBomb() {
+        if (this.notValid()) {
+            return 0;
+        }
+        this.vanish();
+        return getScore();
     }
 }

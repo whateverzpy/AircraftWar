@@ -6,6 +6,8 @@ import edu.hitsz.application.Main;
 import edu.hitsz.prop.AbstractProp;
 import edu.hitsz.factory.prop.UnifiedPropFactory;
 import edu.hitsz.strategy.DirectShoot;
+import edu.hitsz.observer.BombPublisher;
+import edu.hitsz.observer.BombSubscriber;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -14,7 +16,7 @@ import java.util.List;
  * 精英敌机
  * 继承AbstractEnemy，具有射击能力的敌机
  */
-public class EliteEnemy extends AbstractEnemy {
+public class EliteEnemy extends AbstractEnemy implements BombSubscriber {
 
     /**
      * 射击方向 (向下为正)
@@ -42,6 +44,7 @@ public class EliteEnemy extends AbstractEnemy {
      */
     public EliteEnemy(int locationX, int locationY, int speedX, int speedY, int hp) {
         super(locationX, locationY, speedX, speedY, hp);
+        BombPublisher.register(this);
         this.shootNum = 1;
         this.power = 25;
         this.direction = 1;
@@ -81,4 +84,12 @@ public class EliteEnemy extends AbstractEnemy {
         return propFactory.generate(this.getLocationX(), this.getLocationY());
     }
 
+    @Override
+    public int onBomb() {
+        if (this.notValid()) {
+            return 0;
+        }
+        this.vanish();
+        return getScore();
+    }
 }

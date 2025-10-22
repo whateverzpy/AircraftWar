@@ -6,6 +6,8 @@ import edu.hitsz.bullet.EnemyBullet;
 import edu.hitsz.factory.prop.UnifiedPropFactory;
 import edu.hitsz.prop.AbstractProp;
 import edu.hitsz.strategy.ScatterShoot;
+import edu.hitsz.observer.BombPublisher;
+import edu.hitsz.observer.BombSubscriber;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -14,7 +16,7 @@ import java.util.List;
  * 超级精英敌机
  * 具备扇形射击能力，移动轨迹为向下和横向结合
  */
-public class ElitePlusEnemy extends AbstractEnemy {
+public class ElitePlusEnemy extends AbstractEnemy implements BombSubscriber {
 
     /**
      * 射击方向 (向下为正)
@@ -31,6 +33,8 @@ public class ElitePlusEnemy extends AbstractEnemy {
     private final double propDropRate = 0.5;
     private final UnifiedPropFactory propFactory = new UnifiedPropFactory().enableRandomDrop(propDropRate);
 
+    private static final int BOMB_DAMAGE = 50;
+
     /**
      * @param locationX X 坐标
      * @param locationY Y 坐标
@@ -40,11 +44,12 @@ public class ElitePlusEnemy extends AbstractEnemy {
      */
     public ElitePlusEnemy(int locationX, int locationY, int speedX, int speedY, int hp) {
         super(locationX, locationY, speedX, speedY, hp);
-        this.shootNum = 3; // 扇形射击，子弹数量为3
+        BombPublisher.register(this);
+        this.shootNum = 3;
         this.power = 30;
         this.direction = 1;
         this.shootStrategy = new ScatterShoot();
-        this.shootCycle = 800; // 射击周期
+        this.shootCycle = 800;
     }
 
     @Override
@@ -79,5 +84,15 @@ public class ElitePlusEnemy extends AbstractEnemy {
     @Override
     public List<AbstractProp> mayDrop() {
         return propFactory.generate(this.getLocationX(), this.getLocationY());
+    }
+
+    @Override
+    public int onBomb() {
+        if (this.notValid()) {
+            return 0;
+        }
+        this.decreaseHp(BOMB_DAMAGE);
+        // 若因此被击毁，则返还分数
+        return this.notValid() ? getScore() : 0;
     }
 }

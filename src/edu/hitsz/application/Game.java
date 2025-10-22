@@ -13,6 +13,9 @@ import edu.hitsz.dao.ScoreRecord;
 
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 
+import edu.hitsz.observer.BombPublisher;
+import edu.hitsz.observer.BombSubscriber;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -423,6 +426,12 @@ public class Game extends JPanel {
                     }
                 }
                 prop.effect(heroAircraft);
+
+                // 若为炸弹，结算本次炸弹累计分数
+                if (prop instanceof edu.hitsz.prop.BombProp) {
+                    this.score += BombPublisher.drainLastScore();
+                }
+
                 prop.vanish();
             }
         }
@@ -436,9 +445,30 @@ public class Game extends JPanel {
      * 无效的原因可能是撞击或者飞出边界
      */
     private void postProcessAction() {
-        enemyBullets.removeIf(AbstractFlyingObject::notValid);
+        // 敌机子弹：移除并注销炸弹观察者
+        for (Iterator<BaseBullet> it = enemyBullets.iterator(); it.hasNext(); ) {
+            BaseBullet b = it.next();
+            if (b.notValid()) {
+                if (b instanceof BombSubscriber) {
+                    BombPublisher.unregister((BombSubscriber) b);
+                }
+                it.remove();
+            }
+        }
+        // 我方子弹
         heroBullets.removeIf(AbstractFlyingObject::notValid);
-        enemyAircraft.removeIf(AbstractFlyingObject::notValid);
+
+        // 敌机：移除并注销炸弹观察者
+        for (Iterator<AbstractAircraft> it = enemyAircraft.iterator(); it.hasNext(); ) {
+            AbstractAircraft a = it.next();
+            if (a.notValid()) {
+                if (a instanceof BombSubscriber) {
+                    BombPublisher.unregister((BombSubscriber) a);
+                }
+                it.remove();
+            }
+        }
+        // 道具
         props.removeIf(AbstractFlyingObject::notValid);
     }
 

@@ -57,7 +57,7 @@ public class HeroAircraft extends AbstractAircraft {
         this.power = 30;
         this.direction = -1;
         this.shootStrategy = new DirectShoot();
-        this.shootCycle = 200;
+        this.shootCycle = 100;
     }
 
     /**
