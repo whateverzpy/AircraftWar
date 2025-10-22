@@ -2,14 +2,12 @@ package edu.hitsz.aircraft;
 
 import edu.hitsz.application.Main;
 import edu.hitsz.bullet.BaseBullet;
-import edu.hitsz.bullet.EnemyBullet;
 import edu.hitsz.factory.prop.UnifiedPropFactory;
-import edu.hitsz.prop.AbstractProp;
-import edu.hitsz.strategy.ScatterShoot;
 import edu.hitsz.observer.BombPublisher;
 import edu.hitsz.observer.BombSubscriber;
+import edu.hitsz.prop.AbstractProp;
+import edu.hitsz.strategy.ScatterShoot;
 
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -18,6 +16,12 @@ import java.util.List;
  */
 public class ElitePlusEnemy extends AbstractEnemy implements BombSubscriber {
 
+    private static final int BOMB_DAMAGE = 50;
+    /**
+     * 道具掉落概率
+     */
+    private final double propDropRate = 0.5;
+    private final UnifiedPropFactory propFactory = new UnifiedPropFactory().enableRandomDrop(propDropRate);
     /**
      * 射击方向 (向下为正)
      */
@@ -26,14 +30,6 @@ public class ElitePlusEnemy extends AbstractEnemy implements BombSubscriber {
      * 子弹伤害
      */
     private int power = 30;
-
-    /**
-     * 道具掉落概率
-     */
-    private final double propDropRate = 0.5;
-    private final UnifiedPropFactory propFactory = new UnifiedPropFactory().enableRandomDrop(propDropRate);
-
-    private static final int BOMB_DAMAGE = 50;
 
     /**
      * @param locationX X 坐标

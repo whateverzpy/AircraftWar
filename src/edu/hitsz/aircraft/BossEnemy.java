@@ -1,14 +1,12 @@
 package edu.hitsz.aircraft;
 
+import edu.hitsz.application.ImageManager;
 import edu.hitsz.application.Main;
 import edu.hitsz.bullet.BaseBullet;
-import edu.hitsz.bullet.EnemyBullet;
 import edu.hitsz.factory.prop.PropType;
 import edu.hitsz.factory.prop.UnifiedPropFactory;
 import edu.hitsz.prop.AbstractProp;
 import edu.hitsz.strategy.CircleShoot;
-
-import edu.hitsz.application.ImageManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +19,13 @@ import java.util.Random;
 public class BossEnemy extends AbstractEnemy {
 
     /**
+     * 道具掉落数量范围
+     */
+    private final int minDrop = 1;
+    private final int maxDrop = 3;
+    private final UnifiedPropFactory propFactory = new UnifiedPropFactory();
+    private final Random random = new Random();
+    /**
      * 子弹伤害
      */
     private int power = 40;
@@ -28,14 +33,6 @@ public class BossEnemy extends AbstractEnemy {
      * 射击方向 (环形)
      */
     private int shootNum = 20;
-    /**
-     * 道具掉落数量范围
-     */
-    private final int minDrop = 1;
-    private final int maxDrop = 3;
-
-    private final UnifiedPropFactory propFactory = new UnifiedPropFactory();
-    private final Random random = new Random();
 
     public BossEnemy(int locationX, int locationY, int speedX, int speedY, int hp) {
         super(locationX, locationY, speedX, speedY, hp);

@@ -11,14 +11,13 @@ import java.util.Random;
  */
 public class UnifiedPropFactory implements PropFactory {
 
+    private final Random random = new Random();
+    private final PropType[] types = PropType.values();
     private PropType type = PropType.BLOOD;
     private int speedY = 5;
-
     // 随机掉落配置
     private boolean randomEnabled = false;
     private double dropRate = 0.0;
-    private final Random random = new Random();
-    private final PropType[] types = PropType.values();
 
     public UnifiedPropFactory() {
     }

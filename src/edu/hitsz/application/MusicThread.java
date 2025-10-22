@@ -1,24 +1,12 @@
 package edu.hitsz.application;
 
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-
-import javax.sound.sampled.AudioFormat;
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.DataLine;
-import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.SourceDataLine;
-import javax.sound.sampled.UnsupportedAudioFileException;
-import javax.sound.sampled.DataLine.Info;
+import javax.sound.sampled.*;
+import java.io.*;
 
 public class MusicThread extends Thread {
 
     // 音频文件名
-    private String filename;
+    private final String filename;
     private AudioFormat audioFormat;
     private byte[] samples;
     private volatile boolean isLooping = false;

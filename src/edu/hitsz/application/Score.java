@@ -5,14 +5,14 @@ import edu.hitsz.dao.ScoreDao;
 import edu.hitsz.dao.ScoreRecord;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.Collections;
 import java.util.List;
 
-import javax.swing.table.DefaultTableCellRenderer;
-
 public class Score extends JPanel {
+    private final ScoreDao scoreDao;
     private JPanel Panel;
     private JPanel flowLayout;
     private JLabel rank;
@@ -21,9 +21,7 @@ public class Score extends JPanel {
     private JScrollPane scrollPane;
     private JTable scoreTable;
     private JButton deleteButton;
-
-    private final ScoreDao scoreDao;
-    private DefaultTableModel tableModel;
+    private final DefaultTableModel tableModel;
 
     public Score(String difficultyStr) {
         // 将“排行榜”标题居中

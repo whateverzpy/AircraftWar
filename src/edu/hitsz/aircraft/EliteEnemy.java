@@ -1,15 +1,13 @@
 package edu.hitsz.aircraft;
 
-import edu.hitsz.bullet.BaseBullet;
-import edu.hitsz.bullet.EnemyBullet;
 import edu.hitsz.application.Main;
-import edu.hitsz.prop.AbstractProp;
+import edu.hitsz.bullet.BaseBullet;
 import edu.hitsz.factory.prop.UnifiedPropFactory;
-import edu.hitsz.strategy.DirectShoot;
 import edu.hitsz.observer.BombPublisher;
 import edu.hitsz.observer.BombSubscriber;
+import edu.hitsz.prop.AbstractProp;
+import edu.hitsz.strategy.DirectShoot;
 
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -30,7 +28,7 @@ public class EliteEnemy extends AbstractEnemy implements BombSubscriber {
     /**
      * 道具掉落概率
      */
-    private double propDropRate = 0.5;
+    private final double propDropRate = 0.5;
     private final UnifiedPropFactory propFactory = new UnifiedPropFactory().enableRandomDrop(propDropRate);
 
     /**

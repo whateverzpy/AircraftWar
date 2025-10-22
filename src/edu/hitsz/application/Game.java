@@ -1,27 +1,28 @@
 package edu.hitsz.application;
 
 import edu.hitsz.aircraft.*;
-import edu.hitsz.bullet.BaseBullet;
 import edu.hitsz.basic.AbstractFlyingObject;
-
-import edu.hitsz.prop.AbstractProp;
-import edu.hitsz.factory.enemy.UnifiedEnemyFactory;
-
+import edu.hitsz.bullet.BaseBullet;
 import edu.hitsz.dao.FileScoreDaoImpl;
 import edu.hitsz.dao.ScoreDao;
 import edu.hitsz.dao.ScoreRecord;
-
-import org.apache.commons.lang3.concurrent.BasicThreadFactory;
-
+import edu.hitsz.difficulty.DifficultyTemplate;
+import edu.hitsz.factory.enemy.UnifiedEnemyFactory;
 import edu.hitsz.observer.BombPublisher;
 import edu.hitsz.observer.BombSubscriber;
+import edu.hitsz.prop.AbstractProp;
+import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.util.*;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 游戏主面板，游戏启动
@@ -30,31 +31,34 @@ import java.util.concurrent.*;
  */
 public class Game extends JPanel {
 
-    private int backGroundTop = 0;
     private final BufferedImage backgroundImage;
-
     /**
      * Scheduled 线程池，用于任务调度
      */
     private final ScheduledExecutorService executorService;
-
-    /**
-     * 时间间隔(ms)，控制刷新频率
-     */
-    private int timeInterval = 40;
-
     private final HeroAircraft heroAircraft;
     private final List<AbstractAircraft> enemyAircraft;
     private final List<BaseBullet> heroBullets;
     private final List<BaseBullet> enemyBullets;
-
     private final List<AbstractProp> props;
-
+    // 统一敌机工厂（内聚随机生成能力）
+    private final UnifiedEnemyFactory enemyFactory;
+    /**
+     * 得分数据访问对象
+     */
+    private final ScoreDao scoreDao;
+    // 使用模板方法模式
+    private final DifficultyTemplate difficulty;
+    private final boolean soundEnabled;
+    private int backGroundTop = 0;
+    /**
+     * 时间间隔(ms)，控制刷新频率
+     */
+    private final int timeInterval = 40;
     /**
      * 屏幕中出现的敌机最大数量
      */
     private int enemyMaxNumber = 5;
-
     /**
      * 当前得分
      */
@@ -63,42 +67,33 @@ public class Game extends JPanel {
      * 当前时刻
      */
     private int time = 0;
-
     /**
      * 周期（ms)
      * 指示子弹的发射、敌机的产生频率
      */
-    private int cycleDuration = 600;
+    private final int cycleDuration = 600;
     private int cycleTime = 0;
+    /**
+     * 精英敌机出现概率
+     */
     private double eliteProbability = 0.3;
     private double elitePlusProbability = 0.1;
-
+    /**
+     * Boss 存在标志和阈值
+     */
     private boolean bossExists = false;
     private int bossScoreThreshold = 500;
-
-    // 统一敌机工厂（内聚随机生成能力）
-    private final UnifiedEnemyFactory enemyFactory;
-
-    /**
-     * 得分数据访问对象
-     */
-    private final ScoreDao scoreDao;
-
     /**
      * 游戏结束标志
      */
     private boolean gameOverFlag = false;
-
-    private final String difficulty;
-
-    private final boolean soundEnabled;
     private MusicThread bgmThread;
     private MusicThread bossBgmThread;
 
-    public Game(String difficulty, boolean soundEnabled) {
+    public Game(DifficultyTemplate difficulty, boolean soundEnabled) {
         this.difficulty = difficulty;
         this.soundEnabled = soundEnabled;
-        switch (difficulty) {
+        switch (difficulty.getName()) {
             case "Easy":
                 this.backgroundImage = ImageManager.BACKGROUND_IMAGE_EASY;
                 // TODO: 参数设置
@@ -144,6 +139,96 @@ public class Game extends JPanel {
         // 启动英雄机鼠标监听
         new HeroController(this, heroAircraft);
 
+        // 交由难度模板做初始化（参数、概率、阈值等）
+        this.difficulty.init(this);
+
+    }
+
+    // ---------------- 新增对外暴露的 Hook/Getter/Setter ----------------
+    public UnifiedEnemyFactory getEnemyFactory() {
+        return enemyFactory;
+    }
+
+    public int getTime() {
+        return time;
+    }
+
+    public int getScore() {
+        return score;
+    }
+
+    public boolean isBossExists() {
+        return bossExists;
+    }
+
+    public int getBossScoreThreshold() {
+        return bossScoreThreshold;
+    }
+
+    public void setBossScoreThreshold(int v) {
+        this.bossScoreThreshold = v;
+    }
+
+    public int getEnemyCount() {
+        return enemyAircraft.size();
+    }
+
+    public int getEnemyMaxNumber() {
+        return enemyMaxNumber;
+    }
+
+    public void setEnemyMaxNumber(int n) {
+        this.enemyMaxNumber = n;
+    }
+
+    public double getEliteProbability() {
+        return eliteProbability;
+    }
+
+    public void setEliteProbability(double p) {
+        this.eliteProbability = p;
+    }
+
+    public double getElitePlusProbability() {
+        return elitePlusProbability;
+    }
+
+    public void setElitePlusProbability(double p) {
+        this.elitePlusProbability = p;
+    }
+
+    public List<AbstractAircraft> getEnemyList() {
+        return enemyAircraft;
+    }
+
+    public void setHeroShootCycle(int ms) {
+        heroAircraft.setShootCycle(ms);
+    }
+
+    // 由难度模板调用：生成一架普通敌机（遵循当前随机概率）
+    public void spawnOneEnemy() {
+        enemyAircraft.add(enemyFactory.createEnemy());
+    }
+
+    // 由难度模板调用：触发生成 Boss（含音乐切换）
+    public void spawnBoss() {
+        // 临时关闭随机模式，强制创建 Boss
+        enemyFactory.disableRandom();
+        enemyAircraft.add(
+                enemyFactory
+                        .setType(edu.hitsz.factory.enemy.EnemyType.BOSS)
+                        .createEnemy());
+        // 还原随机模式
+        enemyFactory.enableRandom(eliteProbability, elitePlusProbability);
+        bossExists = true;
+        if (soundEnabled) {
+            if (bgmThread != null) {
+                bgmThread.stopMusic();
+            }
+            bossBgmThread = new MusicThread("src/videos/bgm_boss.wav");
+            bossBgmThread.setLoop(true);
+            bossBgmThread.start();
+        }
     }
 
     /**
@@ -156,43 +241,9 @@ public class Game extends JPanel {
 
             time += timeInterval;
 
-            // 周期性执行（控制频率）
+            // 周期性：生成、随时间难度调整（委托给难度模板）
             if (timeCountAndNewCycleJudge()) {
-                System.out.println(time);
-
-                // 如果Boss不存在，并且分数达到阈值，则生成Boss
-                if (!bossExists && score >= bossScoreThreshold) {
-                    // 临时关闭随机模式，强制创建 Boss
-                    enemyFactory.disableRandom();
-                    enemyAircraft.add(
-                            enemyFactory
-                                    .setType(edu.hitsz.factory.enemy.EnemyType.BOSS)
-                                    .createEnemy());
-
-                    // 还原随机模式，使用当前动态概率
-                    enemyFactory.enableRandom(eliteProbability, elitePlusProbability);
-
-                    bossExists = true;
-                    if (soundEnabled) {
-                        if (bgmThread != null) {
-                            bgmThread.stopMusic();
-                        }
-                        bossBgmThread = new MusicThread("src/videos/bgm_boss.wav");
-                        bossBgmThread.setLoop(true);
-                        bossBgmThread.start();
-                    }
-                    System.out.println("A boss is coming!");
-                }
-
-                // 新敌机产生
-                else if (enemyAircraft.size() < enemyMaxNumber && !bossExists) {
-                    // 动态调整精英概率
-                    eliteProbability = Math.min(0.4, 0.2 + time / 60000.0);
-                    elitePlusProbability = Math.min(0.2, 0.1 + time / 120000.0);
-                    enemyFactory.setEliteProbability(eliteProbability);
-                    enemyFactory.setElitePlusProbability(elitePlusProbability);
-                    enemyAircraft.add(enemyFactory.createEnemy());
-                }
+                difficulty.onCycle(this);
             }
 
             // 飞机射出子弹
@@ -265,7 +316,7 @@ public class Game extends JPanel {
         SwingUtilities.invokeLater(() -> {
             JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(this);
             frame.getContentPane().removeAll();
-            Score scorePanel = new Score(this.difficulty);
+            Score scorePanel = new Score(this.difficulty.getName());
             frame.add(scorePanel);
             frame.revalidate();
             frame.repaint();

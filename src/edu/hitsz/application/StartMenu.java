@@ -1,8 +1,9 @@
 package edu.hitsz.application;
 
+import edu.hitsz.difficulty.DifficultyFactory;
+import edu.hitsz.difficulty.DifficultyTemplate;
+
 import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 public class StartMenu extends JPanel {
 
@@ -34,9 +35,9 @@ public class StartMenu extends JPanel {
         });
     }
 
-    private void startGame(String difficulty) {
+    private void startGame(String difficultyName) {
         mainFrame.getContentPane().removeAll();
-        // 注意：您可能需要将 soundEnabled 状态传递给 Game 对象
+        DifficultyTemplate difficulty = DifficultyFactory.create(difficultyName);
         Game game = new Game(difficulty, soundEnabled);
         mainFrame.add(game);
         mainFrame.revalidate();

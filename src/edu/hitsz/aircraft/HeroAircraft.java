@@ -1,11 +1,9 @@
 package edu.hitsz.aircraft;
 
 import edu.hitsz.bullet.BaseBullet;
-import edu.hitsz.bullet.HeroBullet;
 import edu.hitsz.strategy.DirectShoot;
 import edu.hitsz.strategy.ShootStrategy;
 
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -18,25 +16,21 @@ public class HeroAircraft extends AbstractAircraft {
     // 攻击方式
 
     /**
+     * 单例模式实例
+     */
+    private static volatile HeroAircraft instance = null;
+    /**
      * 子弹一次发射数量
      */
     private int shootNum = 1;
-
     /**
      * 子弹伤害
      */
     private int power = 30;
-
     /**
      * 子弹射击方向 (向上发射：-1，向下发射：1)
      */
     private int direction = -1;
-
-    /**
-     * 单例模式实例
-     */
-    private static volatile HeroAircraft instance = null;
-
     /**
      * 火力道具计时器线程
      */

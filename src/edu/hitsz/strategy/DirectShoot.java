@@ -1,8 +1,8 @@
 package edu.hitsz.strategy;
 
 import edu.hitsz.bullet.BaseBullet;
-import edu.hitsz.bullet.HeroBullet;
 import edu.hitsz.bullet.EnemyBullet;
+import edu.hitsz.bullet.HeroBullet;
 
 import java.util.LinkedList;
 import java.util.List;

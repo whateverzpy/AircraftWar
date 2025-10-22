@@ -1,7 +1,7 @@
 package edu.hitsz.aircraft;
 
-import edu.hitsz.bullet.BaseBullet;
 import edu.hitsz.basic.AbstractFlyingObject;
+import edu.hitsz.bullet.BaseBullet;
 import edu.hitsz.strategy.ShootStrategy;
 
 import java.util.List;
@@ -85,10 +85,6 @@ public abstract class AbstractAircraft extends AbstractFlyingObject {
         return hp;
     }
 
-    public int getMaxHp() {
-        return maxHp;
-    }
-
     /**
      * 设置生命值
      *
@@ -96,6 +92,10 @@ public abstract class AbstractAircraft extends AbstractFlyingObject {
      */
     public void setHp(int hp) {
         this.hp = hp;
+    }
+
+    public int getMaxHp() {
+        return maxHp;
     }
 
     /**

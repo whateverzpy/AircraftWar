@@ -1,10 +1,6 @@
 package edu.hitsz.factory.enemy;
 
-import edu.hitsz.aircraft.AbstractEnemy;
-import edu.hitsz.aircraft.MobEnemy;
-import edu.hitsz.aircraft.EliteEnemy;
-import edu.hitsz.aircraft.ElitePlusEnemy;
-import edu.hitsz.aircraft.BossEnemy;
+import edu.hitsz.aircraft.*;
 import edu.hitsz.application.ImageManager;
 import edu.hitsz.application.Main;
 

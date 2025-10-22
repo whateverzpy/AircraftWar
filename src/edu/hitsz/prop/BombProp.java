@@ -1,8 +1,6 @@
 package edu.hitsz.prop;
 
 import edu.hitsz.aircraft.HeroAircraft;
-
-import edu.hitsz.aircraft.HeroAircraft;
 import edu.hitsz.observer.BombPublisher;
 
 public class BombProp extends AbstractProp {
