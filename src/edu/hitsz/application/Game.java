@@ -50,11 +50,16 @@ public class Game extends JPanel {
     // 使用模板方法模式
     private final DifficultyTemplate difficulty;
     private final boolean soundEnabled;
-    private int backGroundTop = 0;
     /**
      * 时间间隔(ms)，控制刷新频率
      */
     private final int timeInterval = 40;
+    /**
+     * 周期（ms)
+     * 指示子弹的发射、敌机的产生频率
+     */
+    private final int cycleDuration = 600;
+    private int backGroundTop = 0;
     /**
      * 屏幕中出现的敌机最大数量
      */
@@ -67,11 +72,6 @@ public class Game extends JPanel {
      * 当前时刻
      */
     private int time = 0;
-    /**
-     * 周期（ms)
-     * 指示子弹的发射、敌机的产生频率
-     */
-    private final int cycleDuration = 600;
     private int cycleTime = 0;
     /**
      * 精英敌机出现概率
@@ -96,16 +96,13 @@ public class Game extends JPanel {
         switch (difficulty.getName()) {
             case "Easy":
                 this.backgroundImage = ImageManager.BACKGROUND_IMAGE_EASY;
-                // TODO: 参数设置
                 break;
             case "Hard":
                 this.backgroundImage = ImageManager.BACKGROUND_IMAGE_HARD;
-                // TODO: 参数设置
                 break;
             case "Normal":
             default:
                 this.backgroundImage = ImageManager.BACKGROUND_IMAGE_NORMAL;
-                // TODO: 参数设置
                 break;
         }
         heroAircraft = HeroAircraft.getInstance();
@@ -355,7 +352,6 @@ public class Game extends JPanel {
     }
 
     private void shootAction() {
-        // TODO 敌机射击
         // 敌机射击 - 每个敌机独立计时
         for (AbstractAircraft enemyAircraft : enemyAircraft) {
             if (enemyAircraft instanceof EliteEnemy || enemyAircraft instanceof ElitePlusEnemy
@@ -400,7 +396,6 @@ public class Game extends JPanel {
      * 3. 英雄获得补给
      */
     private void crashCheckAction() {
-        // TODO 敌机子弹攻击英雄
         for (BaseBullet bullet : enemyBullets) {
             if (bullet.notValid()) {
                 continue;
@@ -431,7 +426,6 @@ public class Game extends JPanel {
                         new MusicThread("src/videos/bullet_hit.wav").start();
                     }
                     if (enemyAircraft.notValid()) {
-                        // TODO 获得分数，产生道具补给
                         if (enemyAircraft instanceof AbstractEnemy) {
                             AbstractEnemy enemy = (AbstractEnemy) enemyAircraft;
                             score += enemy.getScore();
@@ -455,7 +449,7 @@ public class Game extends JPanel {
                         }
                     }
                 }
-                // 英雄机 与 敌机 相撞，均损毁
+                // 英雄机与敌机相撞，均损毁
                 if (enemyAircraft.crash(heroAircraft) || heroAircraft.crash(enemyAircraft)) {
                     enemyAircraft.vanish();
                     heroAircraft.decreaseHp(Integer.MAX_VALUE);
@@ -463,7 +457,6 @@ public class Game extends JPanel {
             }
         }
 
-        // Todo: 我方获得道具，道具生效
         for (AbstractProp prop : props) {
             if (prop.notValid()) {
                 continue;

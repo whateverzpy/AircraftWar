@@ -38,11 +38,7 @@ public class MusicThread extends Thread {
             // 用AudioFormat来获取AudioInputStream的格式
             audioFormat = stream.getFormat();
             samples = getSamples(stream);
-        } catch (UnsupportedAudioFileException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
+        } catch (UnsupportedAudioFileException | IOException e) {
             e.printStackTrace();
         }
     }
@@ -54,7 +50,6 @@ public class MusicThread extends Thread {
         try {
             dataInputStream.readFully(samples);
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
         return samples;
@@ -71,7 +66,6 @@ public class MusicThread extends Thread {
             dataLine = (SourceDataLine) AudioSystem.getLine(info);
             dataLine.open(audioFormat, size);
         } catch (LineUnavailableException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
         dataLine.start();

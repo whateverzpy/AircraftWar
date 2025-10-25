@@ -13,6 +13,7 @@ import java.util.List;
 
 public class Score extends JPanel {
     private final ScoreDao scoreDao;
+    private final DefaultTableModel tableModel;
     private JPanel Panel;
     private JPanel flowLayout;
     private JLabel rank;
@@ -21,7 +22,6 @@ public class Score extends JPanel {
     private JScrollPane scrollPane;
     private JTable scoreTable;
     private JButton deleteButton;
-    private final DefaultTableModel tableModel;
 
     public Score(String difficultyStr) {
         // 将“排行榜”标题居中

@@ -17,6 +17,11 @@ import java.util.List;
 public class EliteEnemy extends AbstractEnemy implements BombSubscriber {
 
     /**
+     * 道具掉落概率
+     */
+    private final double propDropRate = 0.5;
+    private final UnifiedPropFactory propFactory = new UnifiedPropFactory().enableRandomDrop(propDropRate);
+    /**
      * 射击方向 (向下为正)
      */
     private int direction = 1;
@@ -24,12 +29,6 @@ public class EliteEnemy extends AbstractEnemy implements BombSubscriber {
      * 子弹伤害
      */
     private int power = 25;
-
-    /**
-     * 道具掉落概率
-     */
-    private final double propDropRate = 0.5;
-    private final UnifiedPropFactory propFactory = new UnifiedPropFactory().enableRandomDrop(propDropRate);
 
     /**
      * 精英敌机构造方法

@@ -42,6 +42,7 @@ package "bullet" {
 
     class EnemyBullet {
         + EnemyBullet(int locationX, int locationY, int speedX, int speedY, int power)
+        + onBomb():int
     }
 
     BaseBullet <|-- HeroBullet
@@ -102,6 +103,7 @@ package "aircraft" {
         + shoot():List<BaseBullet>
         + getScore():int
         + mayDrop():List<AbstractProp>
+        + onBomb():int
     }
 
     ' 精英敌机（射击更频繁/子弹更强，可掉落道具）
@@ -115,6 +117,7 @@ package "aircraft" {
         + shoot():List<BaseBullet>
         + getScore():int
         + mayDrop():List<AbstractProp>
+        + onBomb():int
     }
 
     class ElitePlusEnemy {
@@ -127,6 +130,7 @@ package "aircraft" {
         + shoot():List<BaseBullet>
         + getScore():int
         + mayDrop():List<AbstractProp>
+        + onBomb():int
     }
 
     class BossEnemy {
@@ -212,7 +216,7 @@ package "factory.enemy" {
         + configElite(int hp, int baseSpeedY):UnifiedEnemyFactory
         + configElitePlus(int hp, int baseSpeedY):UnifiedEnemyFactory
         + configBoss(int hp, int speedX):UnifiedEnemyFactory
-        + enableRandom(double eliteProbability):UnifiedEnemyFactory
+        + enableRandom(double eliteProbability, double elitePlusProbability):UnifiedEnemyFactory
         + disableRandom():UnifiedEnemyFactory
         + setEliteProbability(double eliteProbability):UnifiedEnemyFactory
         + setElitePlusProbability(double elitePlusProbability):UnifiedEnemyFactory
@@ -329,6 +333,76 @@ package dao {
 
     ScoreDao <|.. FileScoreDaoImpl
     ScoreRecord <-- FileScoreDaoImpl
+}
+
+package observer {
+    class BombPublisher {
+        - {static} subscribers:List<BombSubscriber>
+        - {static} lastScore:AtomicInteger
+        - BombPublisher()
+        + {static} register(BombSubscriber s):void
+        + {static} unregister(BombSubscriber s):void
+        + {static} notifyBomb():int
+        + {static} drainLastScore():int
+    }
+
+    interface BombSubscriber {
+        + {abstract} onBomb():int
+    }
+
+    BombSubscriber <-o BombPublisher
+
+    BombSubscriber <|.. EnemyBullet
+    BombSubscriber <|.. MobEnemy
+    BombSubscriber <|.. EliteEnemy
+    BombSubscriber <|.. ElitePlusEnemy
+}
+
+package difficulty {
+    abstract class DifficultyTemplate {
+        - name:String
+        # DifficultyTemplate(String name)
+        + getName():String
+        + init(Game game):void
+        + onCycle(Game game):void
+        # {abstract} doInit(Game game):void
+        # {abstract} scaleOverTime(Game game):void
+        # {abstract} spawnEnemies(Game game):void
+    }
+
+    class DifficultyFactory {
+        - DifficultyFactory()
+        + {static} create(String name):DifficultyTemplate
+    }
+
+    class EasyDifficulty {
+        + EasyDifficulty()
+        # doInit(Game game):void
+        # scaleOverTime(Game game):void
+        # spawnEnemies(Game game):void
+    }
+
+    class NormalDifficulty {
+        - stage:int
+        - nextStageTimeMs:int
+        + NormalDifficulty()
+        # doInit(Game game):void
+        # scaleOverTime(Game game):void
+        # spawnEnemies(Game game):void
+    }
+
+    class HardDifficulty {
+        - stage:int
+        - nextStageTimeMs:int
+        + HardDifficulty()
+        # doInit(Game game):void
+        # scaleOverTime(Game game):void
+        # spawnEnemies(Game game):void
+    }
+
+    DifficultyTemplate <|-- EasyDifficulty
+    DifficultyTemplate <|-- NormalDifficulty
+    DifficultyTemplate <|-- HardDifficulty
 }
 
 @enduml
